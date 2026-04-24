@@ -344,7 +344,7 @@ export default function LandingPage() {
             maxWidth: '960px',
           }}>
             {[
-              { num: '1', title: 'Describe', body: 'Who's the user, what do they want, and why does it matter?' },
+              { num: '1', title: 'Describe', body: 'Who is the user, what do they want, and why does it matter?' },
               { num: '2', title: 'Generate', body: 'Kantan writes the story, AC, and RICE score — formatted and ready.' },
               { num: '3', title: 'Export', body: 'Copy to Notion, Jira, Linear, or GitHub in one click.' },
               { num: '4', title: 'Ship', body: 'Your team starts building instead of waiting for specs.' },
