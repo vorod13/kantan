@@ -694,19 +694,6 @@ export default function LandingPage() {
           <a href="mailto:hello@thekantancompany.com" style={{ fontSize: '12px', color: 'var(--dim)', textDecoration: 'none' }}>Contact</a>
         </div>
       </footer>
-
-      {/* Global Styles */}
-      <style jsx global>{`
-        @media (max-width: 768px) {
-          nav { padding: 14px 20px !important; }
-          nav > div:last-child a:not([href="/demo"]) { display: none; }
-          .hero { padding: 90px 20px 48px !important; }
-          section { padding: 56px 20px !important; }
-          [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
-          [style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: 1fr !important; }
-          [style*="grid-template-columns: repeat(3, 1fr)"] { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </>
   );
 }
