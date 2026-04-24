@@ -1,41 +1,24 @@
+# Kantan - Allow search engines
 User-agent: *
 Allow: /
 
-# Block AI training crawlers
+# Block AI crawlers from training on our content
 User-agent: GPTBot
-Disallow: /
-
-User-agent: ChatGPT-User
 Disallow: /
 
 User-agent: CCBot
 Disallow: /
 
-User-agent: ClaudeBot
+User-agent: Claude-Web
 Disallow: /
 
 User-agent: anthropic-ai
-Disallow: /
-
-User-agent: Claude-Web
 Disallow: /
 
 User-agent: PerplexityBot
 Disallow: /
 
 User-agent: Omgilibot
-Disallow: /
-
-User-agent: FacebookBot
-Disallow: /
-
-User-agent: Bytespider
-Disallow: /
-
-User-agent: PetalBot
-Disallow: /
-
-User-agent: cohere-ai
 Disallow: /
 
 Sitemap: https://thekantancompany.com/sitemap.xml
