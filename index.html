@@ -865,7 +865,7 @@ footer {
       <div id="tier-toggle" style="display:flex;background:var(--paper2);border:1px solid var(--border);border-radius:6px;padding:3px;gap:2px;">
         <button onclick="setTier('free')" id="btn-free" class="tier-btn tier-active" aria-label="Preview Free tier">Free</button>
         <button onclick="setTier('solo')" id="btn-solo" class="tier-btn" aria-label="Preview Solo tier">Solo · $19</button>
-        <button onclick="setTier('team')" id="btn-team" class="tier-btn" aria-label="Preview Team tier">Team · $79</button>
+        <button id="btn-team" class="tier-btn" style="opacity:0.5;cursor:not-allowed;" aria-label="Team tier coming soon" disabled>Team · $79 <span style="font-size:9px;background:var(--border);color:var(--muted);padding:2px 6px;border-radius:8px;margin-left:4px;">SOON</span></button>
       </div>
       <div id="tier-badge" style="font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:3px 10px;border:1px solid var(--border);border-radius:20px;">Free tier</div>
     </div>
@@ -911,8 +911,15 @@ footer {
           </div>
           <div class="input-wrap">
             <div class="demo-label">Platform</div>
-            <input type="text" id="input-platform" class="story-input" maxlength="60" placeholder='e.g. "iOS, Android, Web"' oninput="updateCounter('input-platform','counter-platform',60)"/>
-            <div class="char-counter" id="counter-platform">0 / 60</div>
+            <select id="input-platform" class="story-input" style="cursor:pointer;">
+              <option value="">Select platform</option>
+              <option value="Web">Web</option>
+              <option value="iOS">iOS</option>
+              <option value="Android">Android</option>
+              <option value="Desktop">Desktop</option>
+              <option value="Mobile (both iOS & Android)">Mobile (both iOS & Android)</option>
+              <option value="All Platforms">All Platforms</option>
+            </select>
           </div>
           <!-- AC Template selector -->
           <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
@@ -1267,7 +1274,7 @@ footer {
         <li>Copy plain text</li>
         <li>Kantan default AC format</li>
       </ul>
-      <a href="/demo" style="display: inline-block; text-decoration: none;"><button class="pricing-btn">Get started</button></a>
+      <button class="pricing-btn">Get started</button>
     </div>
     <div class="pricing-card featured">
       <div class="pricing-badge">Most popular</div>
@@ -1312,10 +1319,6 @@ footer {
 <script async src="https://subscribe-forms.beehiiv.com/embed.js"></script>
 <iframe src="https://subscribe-forms.beehiiv.com/a2d269dc-d5a4-4936-a232-458edf41f966" class="beehiiv-embed" data-test-id="beehiiv-embed" frameborder="0" scrolling="no" style="width:100%;height:315px;margin:0;border-radius:8px;background-color:transparent;box-shadow:none;max-width:100%;"></iframe>
 </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:8px;">
-    <div style="height:6px;flex:1;max-width:200px;background:var(--border);border-radius:3px;overflow:hidden;"><div style="height:100%;width:23%;background:var(--accent);border-radius:3px;transition:width 0.5s;"></div></div>
-    <span style="font-size:11px;color:var(--muted);">46 of 200 spots claimed</span>
-  </div>
   <p class="hero-note" style="margin-top:8px;">No credit card now. We'll email you when it's ready with your founding member link. Founding pricing closes at 200 signups.</p>
 </section>
 
