@@ -558,11 +558,7 @@ export default function DemoPage() {
           </p>
         </div>
         
-        <SignIn 
-          path="/demo"
-          routing="path"
-          signUpUrl="/demo"
-        />
+        <SignIn />
       </div>
     );
   }
