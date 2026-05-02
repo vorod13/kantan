@@ -353,7 +353,7 @@ function DemoGenerator({ subscriptionTier }: { subscriptionTier: string }) {
               {result.rateLimit.remaining} of {result.rateLimit.limit} free stories remaining this week
               {result.rateLimit.remaining === 0 && (
                 <div style={{ marginTop: '8px' }}>
-                  <a href="#upgrade" style={{ color: 'var(--accent)', fontWeight: 500 }}>
+                  <a href="https://buy.stripe.com/test_00waEX7XP6R9bwpbHHb7y00" style={{ color: 'var(--accent)', fontWeight: 500 }}>
                     Upgrade to Solo for 200 stories/month →
                   </a>
                 </div>
