@@ -559,10 +559,9 @@ export default function DemoPage() {
         </div>
         
         <SignIn 
-          fallbackRedirectUrl="/demo"
-          signUpFallbackRedirectUrl="/demo"
-          afterSignInUrl="/demo"
-          afterSignUpUrl="/demo"
+          path="/demo"
+          routing="path"
+          signUpUrl="/demo"
         />
       </div>
     );
