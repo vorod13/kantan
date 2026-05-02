@@ -193,7 +193,17 @@ Return your response in this exact JSON format:
       throw new Error('Unexpected response format');
     }
 
-    const result = JSON.parse(content.text);
+    // Parse response - strip markdown code fences if present
+    let jsonText = content.text.trim();
+    
+    // Remove ```json and ``` if Claude wrapped the response
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    const result = JSON.parse(jsonText);
 
     // Return result with rate limit info
     return NextResponse.json({
