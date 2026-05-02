@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from '@clerk/nextjs';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,19 +38,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <meta name="CCBot" content="noindex, nofollow" />
-        <meta name="GPTBot" content="noindex, nofollow" />
-        <meta name="ClaudeBot" content="noindex, nofollow" />
-        <meta name="PerplexityBot" content="noindex, nofollow" />
-        <meta name="ai" content="noai" />
-        <meta name="noai" content="true" />
-      </head>
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+          <meta name="CCBot" content="noindex, nofollow" />
+          <meta name="GPTBot" content="noindex, nofollow" />
+          <meta name="ClaudeBot" content="noindex, nofollow" />
+          <meta name="PerplexityBot" content="noindex, nofollow" />
+          <meta name="ai" content="noai" />
+          <meta name="noai" content="true" />
+        </head>
+        <body>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
