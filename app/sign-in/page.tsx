@@ -34,8 +34,8 @@ export default function SignInPage() {
       
       <SignIn 
         routing="hash"
-        afterSignInUrl="/demo"
-        afterSignUpUrl="/demo"
+        fallbackRedirectUrl="/demo"
+        signUpFallbackRedirectUrl="/demo"
       />
     </div>
   );
