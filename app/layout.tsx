@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
+import { Analytics } from '@vercel/analytics/react';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -51,7 +52,10 @@ export default function RootLayout({
           <meta name="ai" content="noai" />
           <meta name="noai" content="true" />
         </head>
-        <body>{children}</body>
+        <body>
+          {children}
+          <Analytics />
+        </body>
       </html>
     </ClerkProvider>
   );
