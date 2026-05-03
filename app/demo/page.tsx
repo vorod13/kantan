@@ -217,8 +217,8 @@ function DemoGenerator({ subscriptionTier, isSignedIn }: { subscriptionTier: str
         {/* Generator Container with Relative Positioning for Overlay */}
         <div style={{ position: 'relative' }}>
           
-          {/* Paywall Overlay - Email Gate (Not Signed In) */}
-          {!isSignedIn && (
+          {/* Paywall Overlay - Email Gate (Not Signed In AND Free Tier) */}
+          {!isSignedIn && selectedTier === 'free' && (
             <div style={{
               position: 'absolute',
               top: 0,
@@ -343,7 +343,7 @@ function DemoGenerator({ subscriptionTier, isSignedIn }: { subscriptionTier: str
           )}
 
           {/* Paywall Overlay - Solo Tier Preview */}
-          {isSignedIn && showSoloPaywall && (
+          {showSoloPaywall && (
             <div style={{
               position: 'absolute',
               top: 0,
