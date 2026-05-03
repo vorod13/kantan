@@ -29,7 +29,7 @@ const CHAR_LIMITS = {
   USER_REASON: 150,
 } as const;
 
-function DemoGenerator({ subscriptionTier }: { subscriptionTier: string }) {
+function DemoGenerator({ subscriptionTier, isSignedIn }: { subscriptionTier: string; isSignedIn: boolean }) {
   const [userType, setUserType] = useState('');
   const [userAction, setUserAction] = useState('');
   const [userReason, setUserReason] = useState('');
@@ -38,8 +38,13 @@ function DemoGenerator({ subscriptionTier }: { subscriptionTier: string }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<StoryResult | null>(null);
   const [error, setError] = useState('');
+  const [selectedTier, setSelectedTier] = useState<'free' | 'solo' | 'team'>('free');
 
   const isSoloTier = subscriptionTier === 'solo';
+  const isAtLimit = result?.rateLimit?.remaining === 0;
+
+  // Show paywall overlay for Solo tier preview (not actual Solo subscribers)
+  const showSoloPaywall = selectedTier === 'solo' && !isSoloTier;
 
   const handleGenerate = async () => {
     if (!userType.trim() || !userAction.trim() || !userReason.trim() || !platform) {
@@ -116,8 +121,288 @@ function DemoGenerator({ subscriptionTier }: { subscriptionTier: string }) {
         <p style={{
           fontSize: '14px',
           color: 'var(--muted)',
-          marginBottom: '32px',
+          marginBottom: '24px',
         }}>Generate user stories with AC and RICE scoring in seconds</p>
+
+        {/* Tier Toggle */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          marginBottom: '24px',
+        }}>
+          <span style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--muted)',
+          }}>Preview Tier:</span>
+          <div style={{
+            display: 'flex',
+            background: 'var(--paper2)',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            padding: '3px',
+            gap: '2px',
+          }}>
+            <button
+              onClick={() => setSelectedTier('free')}
+              style={{
+                padding: '6px 16px',
+                fontSize: '13px',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                background: selectedTier === 'free' ? 'var(--white)' : 'transparent',
+                color: selectedTier === 'free' ? 'var(--ink)' : 'var(--muted)',
+                transition: 'all 0.2s',
+              }}
+            >
+              Free
+            </button>
+            <button
+              onClick={() => setSelectedTier('solo')}
+              style={{
+                padding: '6px 16px',
+                fontSize: '13px',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                background: selectedTier === 'solo' ? 'var(--white)' : 'transparent',
+                color: selectedTier === 'solo' ? 'var(--ink)' : 'var(--muted)',
+                transition: 'all 0.2s',
+              }}
+            >
+              Solo · $19
+            </button>
+            <button
+              onClick={() => setSelectedTier('team')}
+              disabled
+              style={{
+                padding: '6px 16px',
+                fontSize: '13px',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'not-allowed',
+                background: 'transparent',
+                color: 'var(--muted)',
+                opacity: 0.5,
+              }}
+            >
+              Team · $79 <span style={{fontSize: '9px', background: 'var(--border)', padding: '2px 6px', borderRadius: '8px', marginLeft: '4px'}}>SOON</span>
+            </button>
+          </div>
+          {isSoloTier && (
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              color: 'var(--accent)',
+              padding: '4px 10px',
+              background: 'var(--paper2)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+            }}>
+              ✨ Solo Active
+            </span>
+          )}
+        </div>
+
+        {/* Generator Container with Relative Positioning for Overlay */}
+        <div style={{ position: 'relative' }}>
+          
+          {/* Paywall Overlay - Email Gate (Not Signed In) */}
+          {!isSignedIn && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(13, 13, 13, 0.85)',
+              backdropFilter: 'blur(4px)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+              padding: '20px',
+            }}>
+              <div style={{
+                background: 'var(--white)',
+                padding: '40px',
+                borderRadius: '12px',
+                maxWidth: '480px',
+                textAlign: 'center',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              }}>
+                <h2 style={{
+                  fontFamily: "'Shippori Mincho', serif",
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  marginBottom: '12px',
+                }}>Enter your email to start</h2>
+                <p style={{
+                  fontSize: '15px',
+                  color: 'var(--muted)',
+                  marginBottom: '24px',
+                  lineHeight: 1.6,
+                }}>
+                  Generate 5 user stories per week, free. No credit card required.
+                </p>
+                <a
+                  href="/sign-in"
+                  style={{
+                    display: 'inline-block',
+                    width: '100%',
+                    padding: '14px 32px',
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 500,
+                    fontSize: '15px',
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Get Your Magic Link — Free →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Paywall Overlay - Free Tier Hit Limit */}
+          {isSignedIn && !isSoloTier && isAtLimit && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(13, 13, 13, 0.85)',
+              backdropFilter: 'blur(4px)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+              padding: '20px',
+            }}>
+              <div style={{
+                background: 'var(--white)',
+                padding: '40px',
+                borderRadius: '12px',
+                maxWidth: '480px',
+                textAlign: 'center',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              }}>
+                <h2 style={{
+                  fontFamily: "'Shippori Mincho', serif",
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  marginBottom: '12px',
+                }}>You've used your 5 free stories this week</h2>
+                <p style={{
+                  fontSize: '15px',
+                  color: 'var(--muted)',
+                  marginBottom: '24px',
+                  lineHeight: 1.6,
+                }}>
+                  Upgrade to Solo for 200 stories/month and unlock unlimited potential.
+                </p>
+                <a
+                  href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+                  style={{
+                    display: 'inline-block',
+                    padding: '14px 32px',
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 500,
+                    fontSize: '15px',
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Upgrade to Solo · $19/month →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Paywall Overlay - Solo Tier Preview */}
+          {isSignedIn && showSoloPaywall && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(13, 13, 13, 0.85)',
+              backdropFilter: 'blur(4px)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+              padding: '20px',
+            }}>
+              <div style={{
+                background: 'var(--white)',
+                padding: '40px',
+                borderRadius: '12px',
+                maxWidth: '480px',
+                textAlign: 'center',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              }}>
+                <h2 style={{
+                  fontFamily: "'Shippori Mincho', serif",
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  marginBottom: '12px',
+                }}>Solo Tier - $19/month</h2>
+                <p style={{
+                  fontSize: '15px',
+                  color: 'var(--muted)',
+                  marginBottom: '24px',
+                  lineHeight: 1.6,
+                }}>
+                  Generate 200 user stories per month with full access to all Solo features.
+                </p>
+                <a
+                  href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+                  style={{
+                    display: 'inline-block',
+                    padding: '14px 32px',
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 500,
+                    fontSize: '15px',
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Get Solo Access · $19/month →
+                </a>
+              </div>
+            </div>
+          )}
 
         {/* Input Form */}
         <div style={{
@@ -503,6 +788,7 @@ function DemoGenerator({ subscriptionTier }: { subscriptionTier: string }) {
           </div>
         )}
       </div>
+      </div> {/* Close relative positioned container */}
     </div>
   );
 }
@@ -525,47 +811,9 @@ export default function DemoPage() {
     );
   }
 
-  // Not signed in - show email gate
-  if (!isSignedIn) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--paper)',
-        padding: '20px',
-      }}>
-        <div style={{
-          maxWidth: '480px',
-          textAlign: 'center',
-          marginBottom: '32px',
-        }}>
-          <h1 style={{
-            fontFamily: "'Shippori Mincho', serif",
-            fontSize: '32px',
-            fontWeight: 700,
-            color: 'var(--ink)',
-            marginBottom: '12px',
-          }}>Enter your email to start</h1>
-          <p style={{
-            fontSize: '15px',
-            color: 'var(--muted)',
-            lineHeight: 1.6,
-          }}>
-            Generate 5 user stories per week, free. No credit card required.
-          </p>
-        </div>
-        
-        <SignIn />
-      </div>
-    );
-  }
-
   // Get subscription tier from user metadata
   const subscriptionTier = (user?.publicMetadata?.subscriptionTier as string) || 'free';
 
-  // Signed in - show generator with tier info
-  return <DemoGenerator subscriptionTier={subscriptionTier} />;
+  // Pass both signedIn status and tier to generator
+  return <DemoGenerator subscriptionTier={subscriptionTier} isSignedIn={isSignedIn} />;
 }
