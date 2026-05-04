@@ -14,7 +14,7 @@ export default function Pricing() {
     <section style={{
       padding: '100px 48px',
     }} id="pricing">
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1200px', margin: 0 }}>
         <div style={{
           fontSize: '10px',
           fontWeight: 500,

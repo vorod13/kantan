@@ -4,7 +4,7 @@ export default function Problem() {
       padding: '100px 48px',
       background: 'var(--paper2)',
     }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1200px', margin: 0 }}>
         <div style={{
           fontSize: '10px',
           fontWeight: 500,
