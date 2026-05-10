@@ -2,8 +2,8 @@
 
 import { SignIn } from '@clerk/nextjs';
 import React, { useState } from 'react';
-import SampleMeasurement from '@/components/SampleMeasurement';
-import SampleDashboard from '@/components/SampleDashboard';
+import SampleMeasurement from '@/components/samples/SampleMeasurement';
+import SampleDashboard from '@/components/samples/SampleDashboard';
 
 interface RICEScore {
   reach: { score: number; justification: string };
