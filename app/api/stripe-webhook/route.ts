@@ -40,8 +40,10 @@ export async function POST(req: Request) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         
-        // Get customer email from Stripe
+        // Get customer email - try multiple methods for reliability in test mode
         let customerEmail: string | null = null;
+        
+        // Method 1: Try to get from customer object
         try {
           const customer = await stripe.customers.retrieve(subscription.customer as string);
           if ('email' in customer && customer.email) {
@@ -49,14 +51,26 @@ export async function POST(req: Request) {
           }
         } catch (error: any) {
           console.log('Customer retrieval failed (expected in test mode):', error.message || error);
-          console.log('Customer not found in Stripe, customer may have been deleted');
-          // Return success to Stripe to prevent retries on deleted customers
-          return NextResponse.json({ received: true, skipped: 'customer_deleted' });
+          // Continue to try other methods instead of exiting early
+        }
+        
+        // Method 2: If customer retrieval failed, get from latest invoice
+        if (!customerEmail && subscription.latest_invoice) {
+          try {
+            const invoiceId = typeof subscription.latest_invoice === 'string' 
+              ? subscription.latest_invoice 
+              : subscription.latest_invoice.id;
+            const invoice = await stripe.invoices.retrieve(invoiceId);
+            customerEmail = invoice.customer_email;
+            console.log('Retrieved email from invoice:', customerEmail);
+          } catch (error: any) {
+            console.log('Invoice retrieval failed:', error.message || error);
+          }
         }
 
-        // Early exit if no customer email found
+        // Early exit if no customer email found after all attempts
         if (!customerEmail) {
-          console.log('No customer email found, skipping user update');
+          console.log('No customer email found after all retrieval attempts, skipping user update');
           return NextResponse.json({ received: true, skipped: 'no_email' });
         }
 
