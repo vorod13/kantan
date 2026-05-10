@@ -1,7 +1,9 @@
 'use client';
 
 import { SignIn } from '@clerk/nextjs';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import SampleMeasurement from '@/components/samples/SampleMeasurement';
+import SampleDashboard from '@/components/samples/SampleDashboard';
 
 interface RICEScore {
   reach: { score: number; justification: string };
@@ -39,18 +41,28 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
   const [result, setResult] = useState<StoryResult | null>(null);
   const [error, setError] = useState('');
   const [selectedTier, setSelectedTier] = useState<'free' | 'solo' | 'team'>('free');
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
-  const isSoloTier = subscriptionTier === 'solo';
+  const loadingMessages = [
+    'Thank you for your inputs',
+    'Writing your story',
+    'Scoring priorities',
+    'Making it all kantan',
+    'Making it even more kantan...',
+  ];
+
+  // Check if user has paid tier (Solo OR Founding)
+  const isPaidTier = subscriptionTier === 'solo' || subscriptionTier === 'founding';
   const isAtLimit = result?.rateLimit?.remaining === 0;
 
-  // Show paywall overlay for Solo tier preview (not actual Solo subscribers)
-  const showSoloPaywall = selectedTier === 'solo' && !isSoloTier;
+  // Show paywall overlay for Solo tier preview (not actual paid subscribers)
+  const showSoloPaywall = selectedTier === 'solo' && !isPaidTier;
   
   // Track active tab
   const [activeTab, setActiveTab] = useState<'story' | 'measure' | 'dashboard'>('story');
   
   // Show paywall for Measure/Dashboard tabs
-  const showTabPaywall = (activeTab === 'measure' || activeTab === 'dashboard') && !isSoloTier;
+  const showTabPaywall = (activeTab === 'measure' || activeTab === 'dashboard') && !isPaidTier;
   
   // Get tier badge text
   const getTierBadge = () => {
@@ -59,6 +71,19 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
     if (selectedTier === 'team') return 'Team · $79/mo';
     return 'Free tier';
   };
+
+  // Rotate loading messages every 3 seconds
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      interval = setInterval(() => {
+        setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+      }, 3000);
+    } else {
+      setLoadingMessageIndex(0); // Reset when not loading
+    }
+    return () => clearInterval(interval);
+  }, [loading, loadingMessages.length]);
 
   const handleGenerate = async () => {
     if (!userType.trim() || !userAction.trim() || !userReason.trim() || !platform) {
@@ -205,7 +230,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
         }}>
           {getTierBadge()}
         </div>
-        {isSoloTier && (
+        {isPaidTier && (
           <span style={{
             fontSize: '11px',
             fontWeight: 500,
@@ -215,7 +240,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             border: '1px solid var(--border)',
             borderRadius: '12px',
           }}>
-            ✨ Solo Active
+            ✨ {subscriptionTier === 'founding' ? 'Founding Member' : 'Solo'} Active
           </span>
         )}
       </div>
@@ -287,7 +312,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
         )}
 
         {/* Paywall Overlay - Free Tier Hit Limit */}
-        {isSignedIn && !isSoloTier && isAtLimit && (
+        {isSignedIn && !isPaidTier && isAtLimit && (
           <div style={{
             position: 'absolute',
             top: 0,
@@ -508,72 +533,13 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           </div>
         </div>
 
-        {/* Tab Paywall Overlay for Measure/Dashboard */}
-        {showTabPaywall && (
-          <div style={{
-            position: 'relative',
-            minHeight: '400px',
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(13, 13, 13, 0.85)',
-              backdropFilter: 'blur(4px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-              padding: '20px',
-            }}>
-              <div style={{
-                background: 'var(--white)',
-                padding: '40px',
-                borderRadius: '12px',
-                maxWidth: '480px',
-                textAlign: 'center',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-              }}>
-                <h2 style={{
-                  fontFamily: "'Shippori Mincho', serif",
-                  fontSize: '24px',
-                  fontWeight: 700,
-                  color: 'var(--ink)',
-                  marginBottom: '12px',
-                }}>Solo Tier Feature</h2>
-                <p style={{
-                  fontSize: '15px',
-                  color: 'var(--muted)',
-                  marginBottom: '24px',
-                  lineHeight: 1.6,
-                }}>
-                  {activeTab === 'measure' 
-                    ? 'Measurement planning is available on Solo tier. Upgrade to generate complete measurement plans with event tracking.'
-                    : 'Dashboard blueprints are available on Solo tier. Upgrade to generate visual dashboard mockups for your features.'}
-                </p>
-                <a
-                  href={isSignedIn ? "https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01" : "/sign-in"}
-                  style={{
-                    display: 'inline-block',
-                    padding: '14px 32px',
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    textDecoration: 'none',
-                    borderRadius: '6px',
-                    fontWeight: 500,
-                    fontSize: '15px',
-                    transition: 'transform 0.2s',
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                  {isSignedIn ? 'Upgrade to Solo · $19/month →' : 'Sign In to Upgrade →'}
-                </a>
-              </div>
-            </div>
-          </div>
+        {/* Tab Content - Show samples for Measure/Dashboard on Free tier */}
+        {activeTab === 'measure' && !isPaidTier && (
+          <SampleMeasurement />
+        )}
+        
+        {activeTab === 'dashboard' && !isPaidTier && (
+          <SampleDashboard />
         )}
 
       {/* Input Form - Only show for Story tab */}
@@ -792,11 +758,11 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             letterSpacing: '0.03em',
           }}
         >
-          {loading ? 'Generating...' : 'Generate Story'}
+          {loading ? loadingMessages[loadingMessageIndex] : 'Generate Story'}
         </button>
 
         {/* Rate Limit Display */}
-        {!isSoloTier && result?.rateLimit && (
+        {!isPaidTier && result?.rateLimit && (
           <div style={{
             marginTop: '12px',
             fontSize: '11px',
@@ -814,7 +780,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           </div>
         )}
 
-        {isSoloTier && result?.rateLimit && (
+        {isPaidTier && result?.rateLimit && (
           <>
             {/* Only show counter when at 150+ stories used */}
             {result.rateLimit.remaining <= 50 && result.rateLimit.remaining > 0 && (
@@ -956,9 +922,9 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
         </div>
       )}
       </>
-      )} 
-      </div> 
-    </div> 
+      )}
+      </div> {/* Close demo wrapper */}
+    </div> {/* Close relative positioned container */}
     </div>
   );
 }

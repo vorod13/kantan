@@ -1,6 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
+import { useEffect } from 'react';
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
 import Problem from '@/components/Problem';
@@ -13,6 +14,14 @@ import Footer from '@/components/Footer';
 
 export default function HomePage() {
   const { isLoaded, isSignedIn, user } = useUser();
+
+  // Force session reload when user lands on page (e.g., after Stripe redirect)
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user) {
+      // Reload session to get latest metadata from webhook
+      user.reload();
+    }
+  }, [isLoaded, isSignedIn, user]);
 
   // Get subscription tier from user metadata
   const subscriptionTier = (user?.publicMetadata?.subscriptionTier as string) || 'free';

@@ -41,30 +41,59 @@ export async function POST(req: Request) {
         const subscription = event.data.object as Stripe.Subscription;
         
         // Get customer email from Stripe
-        const customer = await stripe.customers.retrieve(subscription.customer as string);
-        
-        if ('email' in customer && customer.email) {
-          // Find Clerk user by email
-          const client = await clerkClient();
-          const users = await client.users.getUserList({
-            emailAddress: [customer.email],
-          });
-
-          if (users.data.length > 0) {
-            const user = users.data[0];
-            
-            // Update user metadata with subscription info
-            await client.users.updateUserMetadata(user.id, {
-              publicMetadata: {
-                subscriptionTier: subscription.status === 'active' ? 'solo' : 'free',
-                stripeCustomerId: subscription.customer,
-                stripeSubscriptionId: subscription.id,
-                subscriptionStatus: subscription.status,
-              },
-            });
-
-            console.log(`Updated user ${user.id} to Solo tier`);
+        let customerEmail: string | null = null;
+        try {
+          const customer = await stripe.customers.retrieve(subscription.customer as string);
+          if ('email' in customer && customer.email) {
+            customerEmail = customer.email;
           }
+        } catch (error: any) {
+          console.log('Customer retrieval failed (expected in test mode):', error.message || error);
+          console.log('Customer not found in Stripe, customer may have been deleted');
+          // Return success to Stripe to prevent retries on deleted customers
+          return NextResponse.json({ received: true, skipped: 'customer_deleted' });
+        }
+
+        // Early exit if no customer email found
+        if (!customerEmail) {
+          console.log('No customer email found, skipping user update');
+          return NextResponse.json({ received: true, skipped: 'no_email' });
+        }
+
+        // Find Clerk user by email
+        const client = await clerkClient();
+        const users = await client.users.getUserList({
+          emailAddress: [customerEmail],
+        });
+        
+        if (users.data.length > 0) {
+          const user = users.data[0];
+          
+          // Determine tier based on price (Founding $9 vs Solo $19)
+          const priceId = subscription.items.data[0]?.price.id;
+          const price = subscription.items.data[0]?.price;
+          let tier = 'solo';
+          
+          // Differentiate between Founding ($9) and Solo ($19) based on price
+          if (price && price.unit_amount === 900) { // $9.00 in cents
+            tier = 'founding';
+          } else if (price && price.unit_amount === 1900) { // $19.00 in cents
+            tier = 'solo';
+          }
+          
+          // Update user metadata with subscription info
+          await client.users.updateUserMetadata(user.id, {
+            publicMetadata: {
+              subscriptionTier: subscription.status === 'active' ? tier : 'free',
+              stripeCustomerId: subscription.customer,
+              stripeSubscriptionId: subscription.id,
+              subscriptionStatus: subscription.status,
+              priceId: priceId,
+            },
+          });
+          console.log(`Updated user ${user.id} to ${tier} tier (status: ${subscription.status})`);
+        } else {
+          console.log(`No Clerk user found with email: ${customerEmail}`);
         }
         break;
       }
@@ -72,29 +101,45 @@ export async function POST(req: Request) {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         
-        // Get customer email
-        const customer = await stripe.customers.retrieve(subscription.customer as string);
-        
-        if ('email' in customer && customer.email) {
-          const client = await clerkClient();
-          const users = await client.users.getUserList({
-            emailAddress: [customer.email],
-          });
-
-          if (users.data.length > 0) {
-            const user = users.data[0];
-            
-            // Downgrade to free tier
-            await client.users.updateUserMetadata(user.id, {
-              publicMetadata: {
-                subscriptionTier: 'free',
-                stripeCustomerId: subscription.customer,
-                subscriptionStatus: 'canceled',
-              },
-            });
-
-            console.log(`Downgraded user ${user.id} to Free tier`);
+        // Get customer email from Stripe
+        let customerEmail: string | null = null;
+        try {
+          const customer = await stripe.customers.retrieve(subscription.customer as string);
+          if ('email' in customer && customer.email) {
+            customerEmail = customer.email;
           }
+        } catch (error: any) {
+          console.log('Customer retrieval failed (expected in test mode):', error.message || error);
+          console.log('Customer not found in Stripe, customer may have been deleted');
+          return NextResponse.json({ received: true, skipped: 'customer_deleted' });
+        }
+        
+        if (!customerEmail) {
+          console.log('No customer email found, skipping user downgrade');
+          return NextResponse.json({ received: true, skipped: 'no_email' });
+        }
+
+        // Find Clerk user by email
+        const client = await clerkClient();
+        const users = await client.users.getUserList({
+          emailAddress: [customerEmail],
+        });
+        
+        if (users.data.length > 0) {
+          const user = users.data[0];
+          
+          // Downgrade user to Free tier
+          await client.users.updateUserMetadata(user.id, {
+            publicMetadata: {
+              subscriptionTier: 'free',
+              stripeCustomerId: subscription.customer,
+              stripeSubscriptionId: null,
+              subscriptionStatus: 'canceled',
+            },
+          });
+          console.log(`Downgraded user ${user.id} to Free tier`);
+        } else {
+          console.log(`No Clerk user found with email: ${customerEmail}`);
         }
         break;
       }

@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       const user = await client.users.getUser(userId);
       subscriptionTier = (user.publicMetadata?.subscriptionTier as string) || 'free';
       
-      if (subscriptionTier === 'solo') {
+      if (subscriptionTier === 'solo' || subscriptionTier === 'founding') {
         // Solo tier: 200 per month
         rateLimitKey = `solo:${userId}`;
         limit = 200;
@@ -125,25 +125,39 @@ Format EXACTLY as: "As a ${userType}, I want to ${userAction} so that ${userReas
 DO NOT modify this format. DO NOT add platform-specific language like "via mobile app" or "through a web interface".
 The platform is just context - keep it out of the story text itself.
 
-2. ACCEPTANCE CRITERIA
+2. ACCEPTANCE CRITERIA - QUALITY RULES
+- Focus on happy path first, edge cases last
+- Maximum 1 edge case per story (only if truly critical)
+- AC = definition of done, not QA test plan
+- Each criterion must be verifiable by implementation, not testing
+- Avoid vague language like "should handle X gracefully" - be specific about what happens
+- Limit to 5-7 AC total per story
+- AC should describe what MUST work, not what COULD go wrong
+- No overlap with success metrics or measurement concerns
+- Each AC must test a DIFFERENT aspect of functionality - no duplicates or near-duplicates
+- If two AC sound similar, combine them into one clearer criterion
+
+3. ACCEPTANCE CRITERIA
 ${acFormatInstructions}
 Generate 4-6 concrete, testable acceptance criteria that define "done."
 You MAY reference the platform (${platform}) in acceptance criteria where relevant.
 
-3. RICE PRIORITIZATION
-Calculate a RICE score with clear justifications:
+4. RICE PRIORITIZATION
+Calculate RICE score using this formula: (Reach × Impact × Confidence) / Effort
 
-- Reach (1-10): How many users will this impact in the first quarter?
-  Consider the user type and action.
-  
-- Impact (1-10): How much will this improve the user's experience?
-  Consider the importance of the reason/benefit.
-  
-- Confidence (as a percentage): How confident are we in our Reach and Impact estimates?
-  Be realistic - use 80% if well-understood, 50% if uncertain.
-  
-- Effort (in person-weeks): How much engineering/design work is needed?
-  Consider complexity of the action and platform.
+SCORING RULES:
+- Reach: 1-10 scale (how many users affected per time period)
+- Impact: 1-3 scale (massive=3, high=2, medium=1, low=0.5, minimal=0.25)
+- Confidence: percentage (100%, 80%, 50%)
+- Effort: 1-10 scale (story points or person-weeks)
+
+IMPORTANT - ROUNDING:
+- Round Reach, Impact, and Effort to whole numbers only
+- Round Confidence to nearest 10% (100%, 90%, 80%, etc.)
+- Round final RICE score to ONE decimal place (e.g., 9.6, 12.3, 45.8)
+- If final score > 100, round to nearest whole number (e.g., 245, not 245.3827)
+
+Provide clear justification for each score based on the user story context.
 
 Formula: (Reach × Impact × Confidence) / Effort
 
