@@ -1,8 +1,11 @@
 'use client';
 
 import Script from 'next/script';
+import { useResponsive } from '@/app/hooks/useResponsive';
 
 export default function Hero() {
+  const { isMobile, isSmallMobile } = useResponsive();
+
   return (
     <>
       <Script src="https://subscribe-forms.beehiiv.com/embed.js" strategy="afterInteractive" />
@@ -13,24 +16,25 @@ export default function Hero() {
         flexDirection: 'column',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '160px 48px 100px',
+        padding: isMobile ? '90px 20px 48px' : '160px 48px 100px',
         position: 'relative',
       }} id="main-content">
         {/* Large Japanese characters background */}
         <div style={{
           fontFamily: "'Shippori Mincho', serif",
-          fontSize: 'clamp(180px, 24vw, 280px)',
+          fontSize: isMobile ? 'clamp(72px, 18vw, 120px)' : 'clamp(180px, 24vw, 280px)',
           fontWeight: 800,
           lineHeight: 0.9,
           color: 'transparent',
           WebkitTextStroke: '1px rgba(13,13,13,0.12)',
           position: 'absolute',
-          right: '-20px',
+          right: isMobile ? '-8px' : '-20px',
           top: '50%',
           transform: 'translateY(-50%)',
           pointerEvents: 'none',
           userSelect: 'none',
           letterSpacing: '-0.02em',
+          opacity: isMobile ? 0.08 : 1,
         }}>
           簡<br/>単
         </div>
@@ -57,7 +61,7 @@ export default function Hero() {
 
         <h1 style={{
           fontFamily: "'Shippori Mincho', serif",
-          fontSize: 'clamp(42px, 6vw, 80px)',
+          fontSize: isMobile ? '36px' : 'clamp(42px, 6vw, 80px)',
           fontWeight: 700,
           lineHeight: 1.08,
           color: 'var(--ink)',
@@ -69,7 +73,7 @@ export default function Hero() {
         </h1>
 
         <p style={{
-          fontSize: '17px',
+          fontSize: isMobile ? '15px' : '17px',
           color: 'var(--muted)',
           maxWidth: '480px',
           lineHeight: 1.65,
@@ -81,7 +85,7 @@ export default function Hero() {
 
         {/* Beehiiv Waitlist Form */}
         <div id="waitlist">
-          <div style={{ width: '100%', maxWidth: '480px' }}>
+          <div style={{ width: '100%', maxWidth: isMobile ? '100%' : '480px' }}>
             <iframe 
               src="https://subscribe-forms.beehiiv.com/a2d269dc-d5a4-4936-a232-458edf41f966"
               className="beehiiv-embed"
@@ -114,15 +118,16 @@ export default function Hero() {
         {/* Stats */}
         <div style={{
           display: 'flex',
-          gap: '40px',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '20px' : '40px',
           marginTop: '64px',
-          paddingTop: '40px',
+          paddingTop: isMobile ? '28px' : '40px',
           borderTop: '1px solid var(--border)',
         }}>
           <div>
             <div style={{
               fontFamily: "'Shippori Mincho', serif",
-              fontSize: '32px',
+              fontSize: isSmallMobile ? '26px' : '32px',
               fontWeight: 700,
               color: 'var(--ink)',
             }}>~45 min</div>
@@ -137,7 +142,7 @@ export default function Hero() {
           <div>
             <div style={{
               fontFamily: "'Shippori Mincho', serif",
-              fontSize: '32px',
+              fontSize: isSmallMobile ? '26px' : '32px',
               fontWeight: 700,
               color: 'var(--ink)',
             }}>&lt; 30 sec</div>
@@ -152,7 +157,7 @@ export default function Hero() {
           <div>
             <div style={{
               fontFamily: "'Shippori Mincho', serif",
-              fontSize: '32px',
+              fontSize: isSmallMobile ? '26px' : '32px',
               fontWeight: 700,
               color: 'var(--ink)',
             }}>10×</div>

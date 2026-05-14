@@ -1,7 +1,13 @@
+'use client';
+
+import { useResponsive } from '@/app/hooks/useResponsive';
+
 export default function Quote() {
+  const { isMobile } = useResponsive();
+
   return (
     <div style={{
-      padding: '80px 48px',
+      padding: isMobile ? '56px 24px' : '80px 48px',
       background: 'var(--ink)',
       display: 'flex',
       flexDirection: 'column',
@@ -18,15 +24,15 @@ export default function Quote() {
       
       <div style={{
         fontFamily: "'Shippori Mincho', serif",
-        fontSize: 'clamp(22px, 3vw, 36px)',
+        fontSize: isMobile ? '22px' : 'clamp(22px, 3vw, 36px)',
         fontWeight: 400,
         color: 'var(--white)',
         maxWidth: '640px',
         lineHeight: 1.45,
         marginBottom: '20px',
       }}>
-        <span style={{ whiteSpace: 'nowrap' }}>The best PMs don't write better specs.</span><br/>
-        <span style={{ whiteSpace: 'nowrap' }}>They spend <em style={{ color: 'var(--accentL)', fontStyle: 'normal' }}>less time</em> writing them.</span>
+        <span style={{ whiteSpace: isMobile ? 'normal' : 'nowrap' }}>The best PMs don't write better specs.</span><br/>
+        <span style={{ whiteSpace: isMobile ? 'normal' : 'nowrap' }}>They spend <em style={{ color: 'var(--accentL)', fontStyle: 'normal' }}>less time</em> writing them.</span>
       </div>
       
       <div style={{

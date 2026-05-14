@@ -1,14 +1,17 @@
 'use client';
 
 import Script from 'next/script';
+import { useResponsive } from '@/app/hooks/useResponsive';
 
 export default function CTA() {
+  const { isMobile, isSmallMobile } = useResponsive();
+
   return (
     <>
       <Script src="https://subscribe-forms.beehiiv.com/embed.js" strategy="afterInteractive" />
       
       <section style={{
-        padding: '100px 48px',
+        padding: isSmallMobile ? '48px 16px' : isMobile ? '56px 20px' : '100px 48px',
         background: 'var(--paper2)',
         textAlign: 'center',
         alignItems: 'center',
@@ -26,7 +29,7 @@ export default function CTA() {
         
         <h2 style={{
           fontFamily: "'Shippori Mincho', serif",
-          fontSize: 'clamp(32px, 4vw, 52px)',
+          fontSize: isMobile ? '28px' : 'clamp(32px, 4vw, 52px)',
           fontWeight: 700,
           lineHeight: 1.12,
           color: 'var(--ink)',
@@ -44,7 +47,7 @@ export default function CTA() {
           The first 200 people to sign up get founding member pricing — $9/month Solo, locked in forever. That's half price, permanently, just for being early. We'll email you when the product is ready.
         </p>
 
-        <div style={{ width: '100%', maxWidth: '480px' }}>
+        <div style={{ width: '100%', maxWidth: isMobile ? '100%' : '480px' }}>
           <iframe 
             src="https://subscribe-forms.beehiiv.com/a2d269dc-d5a4-4936-a232-458edf41f966" 
             data-test-id="beehiiv-embed" 

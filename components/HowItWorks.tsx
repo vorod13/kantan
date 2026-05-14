@@ -1,4 +1,10 @@
+'use client';
+
+import { useResponsive } from '@/app/hooks/useResponsive';
+
 export default function HowItWorks() {
+  const { isMobile } = useResponsive();
+
   return (
     <div style={{ marginBottom: '56px' }}>
       <div style={{
@@ -12,7 +18,7 @@ export default function HowItWorks() {
       
       <h2 style={{
         fontFamily: "'Shippori Mincho', serif",
-        fontSize: 'clamp(32px, 4vw, 52px)',
+        fontSize: isMobile ? '28px' : 'clamp(32px, 4vw, 52px)',
         fontWeight: 700,
         lineHeight: 1.12,
         color: 'var(--ink)',
@@ -22,15 +28,15 @@ export default function HowItWorks() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '48px',
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+        gap: isMobile ? '28px' : '48px',
         marginTop: '64px',
         maxWidth: '960px',
       }}>
         <div style={{ position: 'relative' }}>
           <div style={{
             fontFamily: "'Shippori Mincho', serif",
-            fontSize: '64px',
+            fontSize: isMobile ? '48px' : '64px',
             fontWeight: 800,
             color: 'transparent',
             WebkitTextStroke: '1px var(--border)',
@@ -55,13 +61,14 @@ export default function HowItWorks() {
             right: '-32px',
             fontSize: '24px',
             color: 'var(--border)',
+            display: isMobile ? 'none' : 'block',
           }}>→</div>
         </div>
 
         <div style={{ position: 'relative' }}>
           <div style={{
             fontFamily: "'Shippori Mincho', serif",
-            fontSize: '64px',
+            fontSize: isMobile ? '48px' : '64px',
             fontWeight: 800,
             color: 'transparent',
             WebkitTextStroke: '1px var(--border)',
@@ -86,13 +93,14 @@ export default function HowItWorks() {
             right: '-32px',
             fontSize: '24px',
             color: 'var(--border)',
+            display: isMobile ? 'none' : 'block',
           }}>→</div>
         </div>
 
         <div style={{ position: 'relative' }}>
           <div style={{
             fontFamily: "'Shippori Mincho', serif",
-            fontSize: '64px',
+            fontSize: isMobile ? '48px' : '64px',
             fontWeight: 800,
             color: 'transparent',
             WebkitTextStroke: '1px var(--border)',
@@ -117,13 +125,14 @@ export default function HowItWorks() {
             right: '-32px',
             fontSize: '24px',
             color: 'var(--border)',
+            display: isMobile ? 'none' : 'block',
           }}>→</div>
         </div>
 
         <div style={{ position: 'relative' }}>
           <div style={{
             fontFamily: "'Shippori Mincho', serif",
-            fontSize: '64px',
+            fontSize: isMobile ? '48px' : '64px',
             fontWeight: 800,
             color: 'transparent',
             WebkitTextStroke: '1px var(--border)',

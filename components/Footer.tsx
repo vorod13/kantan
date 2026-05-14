@@ -1,11 +1,20 @@
+'use client';
+
+import { useResponsive } from '@/app/hooks/useResponsive';
+
 export default function Footer() {
+  const { isMobile } = useResponsive();
+
   return (
     <footer style={{
-      padding: '48px',
+      padding: isMobile ? '32px 20px' : '48px',
       borderTop: '1px solid var(--border)',
       display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: isMobile ? '16px' : '0',
+      textAlign: isMobile ? 'center' : 'left',
     }}>
       <div style={{
         fontFamily: "'Shippori Mincho', serif",
@@ -26,6 +35,7 @@ export default function Footer() {
       <div style={{
         display: 'flex',
         gap: '24px',
+        justifyContent: isMobile ? 'center' : 'flex-start',
       }}>
         <a
           href="#"

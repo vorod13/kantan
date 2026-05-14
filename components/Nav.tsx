@@ -1,4 +1,10 @@
+'use client';
+
+import { useResponsive } from '@/app/hooks/useResponsive';
+
 export default function Nav() {
+  const { isMobile, isSmallMobile } = useResponsive();
+
   return (
     <nav style={{
       position: 'fixed',
@@ -8,7 +14,7 @@ export default function Nav() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '20px 48px',
+      padding: isSmallMobile ? '12px 16px' : isMobile ? '14px 20px' : '20px 48px',
       background: 'rgba(245,242,236,0.88)',
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--border)',
@@ -21,7 +27,7 @@ export default function Nav() {
       }}>
         <div style={{
           fontFamily: "'Shippori Mincho', serif",
-          fontSize: '24px',
+          fontSize: isMobile ? '18px' : '24px',
           fontWeight: 700,
           color: 'var(--ink)',
         }}>
@@ -53,6 +59,7 @@ export default function Nav() {
             fontWeight: 400,
             letterSpacing: '0.03em',
             transition: 'color 0.2s',
+            display: isMobile ? 'none' : 'inline-block',
           }}
           onMouseOver={(e) => e.currentTarget.style.color = 'var(--ink)'}
           onMouseOut={(e) => e.currentTarget.style.color = 'var(--muted)'}
@@ -68,6 +75,7 @@ export default function Nav() {
             fontWeight: 400,
             letterSpacing: '0.03em',
             transition: 'color 0.2s',
+            display: isMobile ? 'none' : 'inline-block',
           }}
           onMouseOver={(e) => e.currentTarget.style.color = 'var(--ink)'}
           onMouseOut={(e) => e.currentTarget.style.color = 'var(--muted)'}

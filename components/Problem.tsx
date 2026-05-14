@@ -1,7 +1,13 @@
+'use client';
+
+import { useResponsive } from '@/app/hooks/useResponsive';
+
 export default function Problem() {
+  const { isMobile, isSmallMobile } = useResponsive();
+
   return (
     <section style={{
-      padding: '100px 48px',
+      padding: isSmallMobile ? '48px 16px' : isMobile ? '56px 20px' : '100px 48px',
       background: 'var(--paper2)',
     }}>
       <div style={{ maxWidth: '1200px', margin: 0 }}>
@@ -16,7 +22,7 @@ export default function Problem() {
         
         <h2 style={{
           fontFamily: "'Shippori Mincho', serif",
-          fontSize: 'clamp(32px, 4vw, 52px)',
+          fontSize: isMobile ? '28px' : 'clamp(32px, 4vw, 52px)',
           fontWeight: 700,
           lineHeight: 1.12,
           color: 'var(--ink)',
@@ -35,7 +41,7 @@ export default function Problem() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
           gap: '1px',
           background: 'var(--border)',
           border: '1px solid var(--border)',

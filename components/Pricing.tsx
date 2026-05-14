@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useResponsive } from '@/app/hooks/useResponsive';
 
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const { isMobile, isSmallMobile } = useResponsive();
 
   const soloPrice = isAnnual ? '$144' : '$19';
   const soloPer = isAnnual ? 'per year (2 months free)' : 'per month';
@@ -12,7 +14,7 @@ export default function Pricing() {
 
   return (
     <section style={{
-      padding: '100px 48px',
+      padding: isSmallMobile ? '48px 16px' : isMobile ? '56px 20px' : '100px 48px',
     }} id="pricing">
       <div style={{ maxWidth: '1200px', margin: 0 }}>
         <div style={{
@@ -26,7 +28,7 @@ export default function Pricing() {
         
         <h2 style={{
           fontFamily: "'Shippori Mincho', serif",
-          fontSize: 'clamp(32px, 4vw, 52px)',
+          fontSize: isMobile ? '28px' : 'clamp(32px, 4vw, 52px)',
           fontWeight: 700,
           lineHeight: 1.12,
           color: 'var(--ink)',
@@ -93,7 +95,7 @@ export default function Pricing() {
         {/* Pricing Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
           gap: '20px',
           marginTop: '56px',
           maxWidth: '900px',
@@ -103,7 +105,7 @@ export default function Pricing() {
             background: 'var(--white)',
             border: '1px solid var(--border)',
             borderRadius: '8px',
-            padding: '36px 28px',
+            padding: isSmallMobile ? '28px 20px' : '36px 28px',
             position: 'relative',
           }}>
             <div style={{
@@ -203,8 +205,9 @@ export default function Pricing() {
             background: 'var(--ink)',
             border: '1px solid var(--accent)',
             borderRadius: '8px',
-            padding: '36px 28px',
+            padding: isSmallMobile ? '28px 20px' : '36px 28px',
             position: 'relative',
+            order: isMobile ? -1 : 0,
           }}>
             <div style={{
               position: 'absolute',
@@ -343,7 +346,7 @@ export default function Pricing() {
             background: 'var(--white)',
             border: '1px solid var(--border)',
             borderRadius: '8px',
-            padding: '36px 28px',
+            padding: isSmallMobile ? '28px 20px' : '36px 28px',
             position: 'relative',
           }}>
             <div style={{
