@@ -92,20 +92,21 @@ export async function POST(req: Request) {
           return NextResponse.json({ received: true, skipped: 'no_subscription' });
         }
         
-        // Retrieve the subscription to get pricing info
+        // Get price from the session's amount_total (already in the event, no need to retrieve)
         let tier = 'solo';
-        try {
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          const price = subscription.items.data[0]?.price;
-          
-          // Differentiate between Founding ($9) and Solo ($19)
-          if (price && price.unit_amount === 900) {
-            tier = 'founding';
-          } else if (price && price.unit_amount === 1900) {
-            tier = 'solo';
-          }
-        } catch (error: any) {
-          console.log('Could not retrieve subscription, defaulting to solo tier:', error.message);
+        const amountTotal = session.amount_total; // This is in cents
+        
+        console.log('Payment amount from session:', amountTotal);
+        
+        // Differentiate between Founding ($9 = 900 cents) and Solo ($19 = 1900 cents)
+        if (amountTotal === 900) {
+          tier = 'founding';
+          console.log('✅ Detected Founding tier ($9.00)');
+        } else if (amountTotal === 1900) {
+          tier = 'solo';
+          console.log('✅ Detected Solo tier ($19.00)');
+        } else {
+          console.log('⚠️ Unknown payment amount:', amountTotal, 'cents - defaulting to solo');
         }
         
         // Find Clerk user by email
