@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'Kantan — Specs, simplified.',
   description: 'Kantan turns a rough idea into a prioritized user story with acceptance criteria, RICE scoring, and a measurement plan in under 30 seconds. Built for product managers.',
   authors: [{ name: 'The Kantan Company' }],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
   openGraph: {
     type: 'website',
     url: 'https://thekantancompany.com/',
