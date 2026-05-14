@@ -2,6 +2,7 @@
 
 import { useUser } from '@clerk/nextjs';
 import { useEffect } from 'react';
+import { Suspense } from 'react';
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
 import Problem from '@/components/Problem';
@@ -12,15 +13,31 @@ import Pricing from '@/components/Pricing';
 import CTA from '@/components/CTA';
 import Footer from '@/components/Footer';
 
-export default function HomePage() {
+function HomePageContent() {
   const { isLoaded, isSignedIn, user } = useUser();
 
-  // Force session reload when user lands on page (e.g., after Stripe redirect)
+  // Force session reload when user returns from Stripe
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
-      // Reload session to get latest metadata from webhook
-      user.reload();
+      // Always reload session on page load to catch any metadata updates from webhooks
+      // This handles: returning from Stripe, returning from Clerk sign-in, or just refreshing
+      const hasReloaded = sessionStorage.getItem('clerk_session_reloaded');
+      
+      if (!hasReloaded) {
+        console.log('Reloading user session to get latest metadata...');
+        user.reload().then(() => {
+          console.log('Session reloaded, tier:', user.publicMetadata?.subscriptionTier);
+          sessionStorage.setItem('clerk_session_reloaded', 'true');
+        });
+      }
     }
+    
+    // Clear the reload flag when user signs out or leaves
+    return () => {
+      if (!isSignedIn) {
+        sessionStorage.removeItem('clerk_session_reloaded');
+      }
+    };
   }, [isLoaded, isSignedIn, user]);
 
   // Get subscription tier from user metadata
@@ -65,5 +82,13 @@ export default function HomePage() {
       <CTA />
       <Footer />
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }

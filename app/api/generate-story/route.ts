@@ -70,6 +70,70 @@ export async function POST(req: NextRequest) {
       const user = await client.users.getUser(userId);
       subscriptionTier = (user.publicMetadata?.subscriptionTier as string) || 'free';
       
+      // ANOMALY DETECTION: Check for suspicious tier changes
+      const previousTier = user.publicMetadata?.previousTier as string;
+      const stripeSubscriptionId = user.publicMetadata?.stripeSubscriptionId as string;
+      
+      // Scenario 1: User previously had paid tier, now shows free/blank, but subscription might still be active
+      if ((previousTier === 'solo' || previousTier === 'founding') && 
+          (!subscriptionTier || subscriptionTier === 'free')) {
+        
+        console.warn('🚨 ANOMALY DETECTED: User downgraded from paid to free', {
+          userId,
+          previousTier,
+          currentTier: subscriptionTier,
+          stripeSubscriptionId,
+        });
+        
+        // If they have a subscription ID, verify with Stripe
+        if (stripeSubscriptionId) {
+          try {
+            const stripe = new (await import('stripe')).default(process.env.STRIPE_SECRET_KEY!, {
+              apiVersion: '2026-04-22.dahlia',
+            });
+            
+            const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+            
+            if (subscription.status === 'active') {
+              // CRITICAL: Metadata says free, but Stripe says active subscription!
+              console.error('🔴 SECURITY ALERT: Active subscription but metadata shows free', {
+                userId,
+                email: user.emailAddresses[0]?.emailAddress,
+                subscriptionId: stripeSubscriptionId,
+                stripeStatus: subscription.status,
+                metadataTier: subscriptionTier,
+              });
+              
+              // Lock the account - force user to contact support
+              return NextResponse.json(
+                {
+                  error: 'account_verification_required',
+                  message: 'Your account requires verification. Please contact support at hello@thekantancompany.com',
+                  supportEmail: 'hello@thekantancompany.com',
+                },
+                { status: 403 }
+              );
+            } else {
+              // Subscription is canceled/expired, downgrade is legitimate
+              console.log('✅ Subscription legitimately canceled, tier correctly downgraded');
+            }
+          } catch (error: any) {
+            console.error('Failed to verify subscription with Stripe:', error.message);
+            // Don't block user if Stripe check fails - could be network issue
+          }
+        }
+      }
+      
+      // Update previousTier for next time (track history)
+      if (subscriptionTier && subscriptionTier !== previousTier) {
+        await client.users.updateUserMetadata(userId, {
+          publicMetadata: {
+            ...user.publicMetadata,
+            previousTier: subscriptionTier,
+          },
+        });
+      }
+      
       if (subscriptionTier === 'solo' || subscriptionTier === 'founding') {
         // Solo tier: 200 per month
         rateLimitKey = `solo:${userId}`;
