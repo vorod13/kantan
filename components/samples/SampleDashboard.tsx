@@ -1,42 +1,47 @@
-export default function SampleDashboard() {
+export default function SampleDashboard({ subscriptionTier }: { subscriptionTier?: string }) {
+  // Check if user has paid tier (Solo OR Founding)
+  const isPaidTier = subscriptionTier === 'solo' || subscriptionTier === 'founding';
+
   return (
     <div style={{ padding: '24px' }}>
-      {/* Upgrade Banner */}
-      <div style={{
-        background: 'var(--paper2)',
-        border: '1px solid var(--border)',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '24px',
-        textAlign: 'center',
-      }}>
-        <p style={{
-          fontSize: '14px',
-          color: 'var(--ink)',
-          marginBottom: '12px',
-          fontWeight: 500,
+      {/* Upgrade Banner - Only show for free tier */}
+      {!isPaidTier && (
+        <div style={{
+          background: 'var(--paper2)',
+          border: '1px solid var(--border)',
+          borderRadius: '8px',
+          padding: '20px',
+          marginBottom: '24px',
+          textAlign: 'center',
         }}>
-          This is a sample dashboard blueprint. Upgrade to Solo to generate your own.
-        </p>
-        <a
-          href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
-          style={{
-            display: 'inline-block',
-            padding: '10px 24px',
-            background: 'var(--accent)',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '6px',
-            fontSize: '13px',
+          <p style={{
+            fontSize: '14px',
+            color: 'var(--ink)',
+            marginBottom: '12px',
             fontWeight: 500,
-            transition: 'transform 0.2s',
-          }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          Upgrade to Solo · $19/month →
-        </a>
-      </div>
+          }}>
+            This is a sample dashboard blueprint. Upgrade to Solo to generate your own.
+          </p>
+          <a
+            href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+            style={{
+              display: 'inline-block',
+              padding: '10px 24px',
+              background: 'var(--accent)',
+              color: '#fff',
+              textDecoration: 'none',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: 500,
+              transition: 'transform 0.2s',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            Upgrade to Solo · $19/month →
+          </a>
+        </div>
+      )}
 
       {/* Sample Dashboard */}
       <div style={{
