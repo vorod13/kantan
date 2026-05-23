@@ -5,12 +5,8 @@ import { useEffect } from 'react';
 import { Suspense } from 'react';
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
-import Problem from '@/components/Problem';
-import HowItWorks from '@/components/HowItWorks';
 import DemoGenerator from '@/components/DemoGenerator';
-import Quote from '@/components/Quote';
 import Pricing from '@/components/Pricing';
-import CTA from '@/components/CTA';
 import Footer from '@/components/Footer';
 
 function HomePageContent() {
@@ -47,14 +43,33 @@ function HomePageContent() {
     <>
       <Nav />
       <Hero />
-      <Problem />
       
-      {/* How it Works Section with Generator */}
-      <section style={{
-        padding: '100px 48px',
-      }} id="how">
-        <div style={{ maxWidth: '1200px', margin: 0 }}>
-          <HowItWorks />
+      {/* Generator Section - Inside Hero Flow */}
+		<section style={{
+		  padding: '0px 48px 100px',
+		  background: 'var(--paper)',
+		}} id="generator">
+		  <div style={{ maxWidth: '1200px' }}>
+			{/* Eyebrow */}
+			<div style={{
+			  fontSize: '11px',
+			  fontWeight: 500,
+			  letterSpacing: '0.2em',
+			  textTransform: 'uppercase',
+			  color: 'var(--accent)',
+			  marginBottom: '32px',
+			  display: 'flex',
+			  alignItems: 'center',
+			  gap: '10px',
+			}}>
+			  <span style={{
+				display: 'block',
+				width: '32px',
+				height: '1px',
+				background: 'var(--accent)',
+			  }}></span>
+			  Write your story
+			</div>
 
           {/* Real Working Generator */}
           {isLoaded && (
@@ -77,9 +92,7 @@ function HomePageContent() {
         </div>
       </section>
 
-      <Quote />
       <Pricing />
-      <CTA />
       <Footer />
     </>
   );

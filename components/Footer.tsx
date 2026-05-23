@@ -29,7 +29,7 @@ export default function Footer() {
         fontSize: '12px',
         color: 'var(--dim)',
       }}>
-        Specs, simplified. · © 2026
+       Kantan Labs LLC ©  ·  2026
       </div>
       
       <div style={{

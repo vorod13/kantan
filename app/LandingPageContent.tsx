@@ -629,12 +629,12 @@ export default function LandingPageContent() {
             fontWeight: 700,
             color: 'var(--ink)',
           }}>かんたん</div>
-          <div style={{ fontSize: '12px', color: 'var(--dim)' }}>The Kantan Company © 2026</div>
+          <div style={{ fontSize: '12px', color: 'var(--dim)' }}>Kantan Labs LLC © 2026</div>
         </div>
         <div style={{ display: 'flex', gap: '24px' }}>
           <a href="/demo" style={{ fontSize: '12px', color: 'var(--dim)', textDecoration: 'none' }}>Demo</a>
           <a href="#pricing" style={{ fontSize: '12px', color: 'var(--dim)', textDecoration: 'none' }}>Pricing</a>
-          <a href="mailto:hello@thekantancompany.com" style={{ fontSize: '12px', color: 'var(--dim)', textDecoration: 'none' }}>Contact</a>
+          <a href="mailto:hello@kantanlabs.com" style={{ fontSize: '12px', color: 'var(--dim)', textDecoration: 'none' }}>Contact</a>
         </div>
       </footer>
     </>

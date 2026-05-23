@@ -1,9 +1,13 @@
 'use client';
 
 import { useResponsive } from '@/app/hooks/useResponsive';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Nav() {
   const { isMobile, isSmallMobile } = useResponsive();
+  const pathname = usePathname();
+  const isHomepage = pathname === '/';
 
   return (
     <nav style={{
@@ -20,38 +24,71 @@ export default function Nav() {
       borderBottom: '1px solid var(--border)',
       zIndex: 100,
     }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: '10px',
-      }}>
+      {/* Logo - clickable if not on homepage */}
+      {isHomepage ? (
         <div style={{
-          fontFamily: "'Shippori Mincho', serif",
-          fontSize: isMobile ? '18px' : '24px',
-          fontWeight: 700,
-          color: 'var(--ink)',
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: '10px',
         }}>
-          かんたん
+          <div style={{
+            fontFamily: "'Shippori Mincho', serif",
+            fontSize: isMobile ? '18px' : '24px',
+            fontWeight: 700,
+            color: 'var(--ink)',
+          }}>
+            かんたん
+          </div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'var(--muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}>
+            Kantan
+          </div>
         </div>
-        <div style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: '13px',
-          fontWeight: 500,
-          color: 'var(--muted)',
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}>
-          Kantan
-        </div>
-      </div>
+      ) : (
+        <Link 
+          href="/"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '10px',
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{
+            fontFamily: "'Shippori Mincho', serif",
+            fontSize: isMobile ? '18px' : '24px',
+            fontWeight: 700,
+            color: 'var(--ink)',
+          }}>
+            かんたん
+          </div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'var(--muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}>
+            Kantan
+          </div>
+        </Link>
+      )}
 
       <div style={{
         display: 'flex',
         gap: '32px',
         alignItems: 'center',
       }}>
-        <a
-          href="#how"
+        <Link
+          href="/about"
           style={{
             fontSize: '13px',
             color: 'var(--muted)',
@@ -64,10 +101,11 @@ export default function Nav() {
           onMouseOver={(e) => e.currentTarget.style.color = 'var(--ink)'}
           onMouseOut={(e) => e.currentTarget.style.color = 'var(--muted)'}
         >
-          How it works
-        </a>
-        <a
-          href="#pricing"
+          About
+        </Link>
+        <Link
+          href={isHomepage ? "#pricing" : "/#pricing"}
+          scroll={true}
           style={{
             fontSize: '13px',
             color: 'var(--muted)',
@@ -81,9 +119,10 @@ export default function Nav() {
           onMouseOut={(e) => e.currentTarget.style.color = 'var(--muted)'}
         >
           Pricing
-        </a>
-        <a
-          href="#waitlist"
+        </Link>
+        <Link
+          href={isHomepage ? "#waitlist" : "/#waitlist"}
+          scroll={true}
           style={{
             fontSize: '13px',
             color: 'var(--white)',
@@ -99,7 +138,7 @@ export default function Nav() {
           onMouseOut={(e) => e.currentTarget.style.background = 'var(--accent)'}
         >
           Get founding pricing
-        </a>
+        </Link>
       </div>
     </nav>
   );

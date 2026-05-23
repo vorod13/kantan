@@ -1,9 +1,12 @@
 'use client';
 
 import { SignIn } from '@clerk/nextjs';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SampleMeasurement from '@/components/samples/SampleMeasurement';
 import SampleDashboard from '@/components/samples/SampleDashboard';
+import FirstTimeBanner from '@/components/FirstTimeBanner';
+import { useTypewriter } from '@/app/hooks/useTypewriter';
+import { DEMO_INPUT, DEMO_STORY_RESULT } from '@/lib/demoData';
 
 interface RICEScore {
   reach: { score: number; justification: string };
@@ -42,6 +45,13 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
   const [error, setError] = useState('');
   const [selectedTier, setSelectedTier] = useState<'free' | 'solo' | 'team'>('free');
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  
+  // Demo mode state
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const [hasGeneratedFirstStory, setHasGeneratedFirstStory] = useState(false);
+  const [showDemoResult, setShowDemoResult] = useState(false);
+  const [highlightResult, setHighlightResult] = useState(false);
 
   const loadingMessages = [
     'Thank you for your inputs',
@@ -50,100 +60,290 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
     'Making it all kantan',
     'Making it even more kantan...',
   ];
-
-  // Check if user has paid tier (Solo OR Founding)
-  const isPaidTier = subscriptionTier === 'solo' || subscriptionTier === 'founding';
-  const isAtLimit = result?.rateLimit?.remaining === 0;
-
-  // Show paywall overlay for Solo tier preview (not actual paid subscribers)
-  const showSoloPaywall = selectedTier === 'solo' && !isPaidTier;
   
-  // Track active tab
-  const [activeTab, setActiveTab] = useState<'story' | 'measure' | 'dashboard'>('story');
+  // Demo data for "Try an example"
+	const DEMO_DATA = {
+	  userType: 'busy online shopper',
+	  userAction: 'search feature with autocomplete',
+	  userReason: 'find products faster without typing full queries',
+	  platform: 'Web',
+	  result: {
+		userStory: 'As a busy online shopper, I want a search feature with autocomplete suggestions, so that I can find products faster without typing full queries.',
+		acceptanceCriteria: [
+		  'Search bar is prominently displayed in header on all pages',
+		  'Search accepts text input and shows autocomplete dropdown after user types 2+ characters',
+		  'Autocomplete displays top 5 relevant products and categories based on partial input',
+		  'User can navigate autocomplete suggestions using keyboard (arrow keys, Enter to select)',
+		  'Clicking a suggestion navigates to product page or search results',
+		  'Search works on mobile with touch-optimized dropdown',
+		  'Autocomplete results load within 200ms of user input',
+		  'Search history is saved locally for returning users (last 10 searches)',
+		],
+		rice: {
+		  reach: {
+			score: 8,
+			justification: '80% of users search at least once per visit. High-traffic feature impacting majority of user base.',
+		  },
+		  impact: {
+			score: 3,
+			justification: 'High impact - directly reduces time-to-purchase by 30% based on A/B tests. Autocomplete significantly improves search success rate.',
+		  },
+		  confidence: {
+			score: 90,
+			justification: 'Validated by extensive user research, competitive analysis, and previous A/B test showing 25% increase in search-to-purchase conversion.',
+		  },
+		  effort: {
+			score: 5,
+			justification: 'Medium effort - requires frontend autocomplete component, backend search indexing with Elasticsearch, API endpoint for suggestions, and mobile optimization. Estimated 2-3 sprint cycles.',
+		  },
+		  totalScore: 43.2,
+		  calculation: '(8 × 3 × 0.9) / 5 = 43.2',
+		},
+	  }
+	};
+
+	  // Check if user has paid tier (Solo OR Founding)
+	  const isPaidTier = subscriptionTier === 'solo' || subscriptionTier === 'founding';
+	  const isAtLimit = result?.rateLimit?.remaining === 0;
+
+	  // Show paywall overlay for Solo tier preview (not actual paid subscribers)
+	  const showSoloPaywall = selectedTier === 'solo' && !isPaidTier;
+	  
+	  // Track active tab
+	  const [activeTab, setActiveTab] = useState<'story' | 'measure' | 'dashboard'>('story');
+	  
+	  // Show paywall for Measure/Dashboard tabs
+	  const showTabPaywall = (activeTab === 'measure' || activeTab === 'dashboard') && !isPaidTier;
+	  
+	  // Get tier badge text
+	  const getTierBadge = () => {
+		if (selectedTier === 'free') return 'Free tier';
+		if (selectedTier === 'solo') return 'Solo · $19/mo';
+		if (selectedTier === 'team') return 'Team · $79/mo';
+		return 'Free tier';
+	  };
+
+	  // Rotate loading messages every 3 seconds
+	  React.useEffect(() => {
+		let interval: NodeJS.Timeout;
+		if (loading) {
+		  interval = setInterval(() => {
+			setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+		  }, 3000);
+		} else {
+		  setLoadingMessageIndex(0); // Reset when not loading
+		}
+		return () => clearInterval(interval);
+	  }, [loading, loadingMessages.length]);
   
-  // Show paywall for Measure/Dashboard tabs
-  const showTabPaywall = (activeTab === 'measure' || activeTab === 'dashboard') && !isPaidTier;
+		// Show banner on first visit (Free tab only)
+		useEffect(() => {
+		  if (selectedTier === 'free') {
+			const hasSeenBanner = localStorage.getItem('hasSeenInterstitial');
+			if (!hasSeenBanner) {
+			  setShowInterstitial(true);
+			}
+		  }
+		}, [selectedTier]);
+
+	// Check if user has generated first story
+	useEffect(() => {
+	  const hasGenerated = localStorage.getItem('hasGeneratedFirstStory');
+	  if (hasGenerated) {
+		setHasGeneratedFirstStory(true);
+	  }
+	}, []);
+
+	
+	// Handle "Try an example" from banner
+	const handleTryExample = () => {
+	  // Instantly pre-fill demo data
+	  setUserType(DEMO_DATA.userType);
+	  setUserAction(DEMO_DATA.userAction);
+	  setUserReason(DEMO_DATA.userReason);
+	  setPlatform(DEMO_DATA.platform);
+	  
+	  setIsDemoMode(true);
+	  setShowInterstitial(false);
+	  
+	  // Scroll to generator
+	  setTimeout(() => {
+		document.getElementById('generator')?.scrollIntoView({ 
+		  behavior: 'smooth', 
+		  block: 'start' 
+		});
+	  }, 100);
+		  
+		};
+
+	// Handle dismiss banner
+	const handleDismissBanner = () => {
+	  setShowInterstitial(false);
+	};
+
+	// Handle user editing fields - exits demo mode
+	const handleUserInput = (field: 'userType' | 'userAction' | 'userReason', value: string) => {
+	 console.log('handleUserInput called!', { field, showDemoResult });	
+		
+    // Exit demo mode when user types their own input
+    if (isDemoMode) {
+    setIsDemoMode(false);
+    }
   
-  // Get tier badge text
-  const getTierBadge = () => {
-    if (selectedTier === 'free') return 'Free tier';
-    if (selectedTier === 'solo') return 'Solo · $19/mo';
-    if (selectedTier === 'team') return 'Team · $79/mo';
-    return 'Free tier';
-  };
-
-  // Rotate loading messages every 3 seconds
-  React.useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (loading) {
-      interval = setInterval(() => {
-        setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
-      }, 3000);
-    } else {
-      setLoadingMessageIndex(0); // Reset when not loading
+    // Clear demo result flag to show paywall
+    if (showDemoResult) {
+    setShowDemoResult(false);
     }
-    return () => clearInterval(interval);
-  }, [loading, loadingMessages.length]);
+  
+    if (field === 'userType') setUserType(value);
+    if (field === 'userAction') setUserAction(value);
+    if (field === 'userReason') setUserReason(value);
+    };
 
-  const handleGenerate = async () => {
-    if (!userType.trim() || !userAction.trim() || !userReason.trim() || !platform) {
-      setError('Please fill in all fields');
-      return;
-    }
+	  const handleGenerate = async () => {
+	  // Clear demo result flag
+	  if (showDemoResult) {
+		setShowDemoResult(false);
+	  }
+	  
+	  // Validation
+	  if (!userType.trim() || !userAction.trim() || !userReason.trim() || !platform) {
+		setError('Please fill in all fields');
+		return;
+	  }
 
-    setLoading(true);
-    setError('');
-    setResult(null);
+	  // Check if user has generated first story and should see paywall (but NOT in demo mode)
+		if (hasGeneratedFirstStory && !isSignedIn && !isDemoMode) {
+		  setError('Please sign up to continue generating stories');
+		  return;
+		}
 
-    try {
-      const response = await fetch('/api/generate-story', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userType: userType.slice(0, CHAR_LIMITS.USER_TYPE),
-          userAction: userAction.slice(0, CHAR_LIMITS.USER_ACTION),
-          userReason: userReason.slice(0, CHAR_LIMITS.USER_REASON),
-          platform,
-          acFormat,
-        }),
-      });
+	  // DEMO MODE: Show pre-written result without API call
+	  if (isDemoMode) {
+		setLoading(true);
+		setError('');
+		setResult(null);
 
-      const data = await response.json();
+		// Simulate loading for 2-3 seconds
+		setTimeout(() => {
+		  setResult(DEMO_DATA.result);
+		  setLoading(false);
+		  
+		  // Mark that user has generated first story
+		  localStorage.setItem('hasGeneratedFirstStory', 'true');
+		  setHasGeneratedFirstStory(true);
+		  setShowDemoResult(true);
+		  
+		  // Clear fields and exit demo mode
+		  setUserType('');
+		  setUserAction('');
+		  setUserReason('');
+		  setPlatform('');
+		  setIsDemoMode(false);
+		  
+		  // Scroll to result and highlight it
+		  setTimeout(() => {
+		  document.getElementById('story-result')?.scrollIntoView({ 
+			behavior: 'smooth', 
+			block: 'center' 
+		  });
+		  
+		  // Slight delay before highlighting to let result render
+		  setTimeout(() => {
+			setHighlightResult(true);
+			
+			// Remove highlight after 2 seconds
+			setTimeout(() => setHighlightResult(false), 2000);
+		  }, 200);
+		}, 100);
+		}, 2500);
+		
+		return;
+	  }
 
-      if (!response.ok) {
-        throw new Error(data.error || data.message || 'Failed to generate story');
-      }
+	  // REAL MODE: Call API
+	  setLoading(true);
+	  setError('');
+	  setResult(null);
 
-      setResult(data);
-      
-      // Clear form
-      setUserType('');
-      setUserAction('');
-      setUserReason('');
-      setPlatform('');
-      setAcFormat('default');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+	  try {
+		const response = await fetch('/api/generate-story', {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json',
+		  },
+		  body: JSON.stringify({
+			userType: userType.slice(0, CHAR_LIMITS.USER_TYPE),
+			userAction: userAction.slice(0, CHAR_LIMITS.USER_ACTION),
+			userReason: userReason.slice(0, CHAR_LIMITS.USER_REASON),
+			platform,
+			acFormat,
+		  }),
+		});
 
-  const getCharCount = (text: string, limit: number) => {
-    const percent = (text.length / limit) * 100;
-    let color = '#7A7368';
-    if (percent >= 100) color = '#C00';
-    else if (percent >= 90) color = '#C8410A';
-    return { count: text.length, color };
-  };
+		const data = await response.json();
 
-  return (
-    <div style={{
-      maxWidth: '900px',
-    }}>
-      {/* Tier Toggle */}
+		if (!response.ok) {
+		  throw new Error(data.error || data.message || 'Failed to generate story');
+		}
+
+		setResult(data);
+	  } catch (err: any) {
+		setError(err.message);
+	  } finally {
+		setLoading(false);
+	  }
+	};
+
+	  const getCharCount = (text: string, limit: number) => {
+		const percent = (text.length / limit) * 100;
+		let color = '#7A7368';
+		if (percent >= 100) color = '#C00';
+		else if (percent >= 90) color = '#C8410A';
+		return { count: text.length, color };
+	  };
+
+
+	  return (
+	  <>
+		<style>{`
+		  @keyframes pulse {
+			0% {
+			  box-shadow: 0 0 0 0 rgba(196, 77, 23, 0.7);
+			}
+			50% {
+			  box-shadow: 0 0 0 10px rgba(196, 77, 23, 0);
+			}
+			100% {
+			  box-shadow: 0 0 0 0 rgba(196, 77, 23, 0);
+			}
+		  }
+		  
+		  @keyframes highlightFade {
+			0% {
+			  border-color: var(--accent);
+			  box-shadow: 0 0 20px rgba(196, 77, 23, 0.3);
+			}
+			100% {
+			  border-color: var(--border);
+			  box-shadow: 0 0 0 rgba(196, 77, 23, 0);
+			}
+		  }
+`       }</style>	
+		
+		<div style={{
+		  maxWidth: '900px',
+		}}>
+		
+		{/* First Time Interstitial - Free Tab Only */}
+		{selectedTier === 'free' && showInterstitial && (
+		  <FirstTimeBanner
+			onTryExample={handleTryExample}
+			onDismiss={handleDismissBanner}
+		  />
+		)}
+
+        {/* Tier Toggle */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -240,7 +440,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             border: '1px solid var(--border)',
             borderRadius: '12px',
           }}>
-            ✨ {subscriptionTier === 'founding' ? 'Founding Member' : 'Solo'} Active
+            ✦ {subscriptionTier === 'founding' ? 'Founding Member' : 'Solo'} Active
           </span>
         )}
       </div>
@@ -249,7 +449,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
       <div style={{ position: 'relative' }}>
         
         {/* Paywall Overlay - Email Gate (Not Signed In AND Free Tier) */}
-        {!isSignedIn && selectedTier === 'free' && (
+        {!isSignedIn && selectedTier === 'free' && !isDemoMode && !showDemoResult && (
           <div style={{
             position: 'absolute',
             top: 0,
@@ -273,21 +473,30 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
               textAlign: 'center',
               boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
             }}>
-              <h2 style={{
-                fontFamily: "'Shippori Mincho', serif",
-                fontSize: '24px',
-                fontWeight: 700,
-                color: 'var(--ink)',
-                marginBottom: '12px',
-              }}>Enter your email to start</h2>
               <p style={{
-                fontSize: '15px',
-                color: 'var(--muted)',
-                marginBottom: '24px',
-                lineHeight: 1.6,
-              }}>
-                Generate 5 user stories per week, free. No credit card required.
-              </p>
+			  fontSize: '14px',
+			  color: 'var(--ink)',
+			  marginBottom: '16px',
+			  fontWeight: 500,
+			}}>
+			  You've used your first free story!
+			</p>
+
+			<h2 style={{
+			  fontFamily: "'Shippori Mincho', serif",
+			  fontSize: '24px',
+			  fontWeight: 700,
+			  color: 'var(--ink)',
+			  marginBottom: '12px',
+			}}>Enter your email to start</h2>
+			<p style={{
+			  fontSize: '15px',
+			  color: 'var(--muted)',
+			  marginBottom: '24px',
+			  lineHeight: 1.6,
+			}}>
+			  Generate 3 user stories per week, free. No credit card required.
+			</p>
               <a
                 href="/sign-in"
                 style={{
@@ -342,7 +551,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                 fontWeight: 700,
                 color: 'var(--ink)',
                 marginBottom: '12px',
-              }}>You've used your 5 free stories this week</h2>
+              }}>You've used your 3 free stories this week</h2>
               <p style={{
                 fontSize: '15px',
                 color: 'var(--muted)',
@@ -460,7 +669,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             marginLeft: '8px',
             fontFamily: "'DM Mono', monospace",
           }}>
-            thekantancompany.com — {selectedTier} tier
+            kantanlabs.com — {selectedTier} tier
           </span>
         </div>
 
@@ -533,13 +742,13 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           </div>
         </div>
 
-        {/* Tab Content - Show samples for Measure/Dashboard on Free tier */}
-        {activeTab === 'measure' && !isPaidTier && (
-          <SampleMeasurement />
+        {/* Tab Content - Show samples for Measure/Dashboard tabs */}
+        {activeTab === 'measure' && (
+          <SampleMeasurement subscriptionTier={subscriptionTier} />
         )}
         
-        {activeTab === 'dashboard' && !isPaidTier && (
-          <SampleDashboard />
+        {activeTab === 'dashboard' && (
+          <SampleDashboard subscriptionTier={subscriptionTier} />
         )}
 
       {/* Input Form - Only show for Story tab */}
@@ -566,7 +775,12 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           <input
             type="text"
             value={userType}
-            onChange={(e) => setUserType(e.target.value)}
+            onChange={(e) => handleUserInput('userType', e.target.value)}
+			onFocus={() => {
+		    if (showDemoResult) {
+			setShowDemoResult(false);
+		    }
+		  }}
             placeholder="e.g., a project manager"
             disabled={loading}
             maxLength={CHAR_LIMITS.USER_TYPE}
@@ -605,7 +819,12 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           <input
             type="text"
             value={userAction}
-            onChange={(e) => setUserAction(e.target.value)}
+            onChange={(e) => handleUserInput('userType', e.target.value)}
+			onFocus={() => {
+		    if (showDemoResult) {
+			setShowDemoResult(false);
+		    }
+		  }}
             placeholder="e.g., export a task list as a CSV"
             disabled={loading}
             maxLength={CHAR_LIMITS.USER_ACTION}
@@ -644,7 +863,12 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           <input
             type="text"
             value={userReason}
-            onChange={(e) => setUserReason(e.target.value)}
+            onChange={(e) => handleUserInput('userType', e.target.value)}
+			onFocus={() => {
+		    if (showDemoResult) {
+			setShowDemoResult(false);
+		    }
+		  }}
             placeholder="e.g., so they can share progress with stakeholders"
             disabled={loading}
             maxLength={CHAR_LIMITS.USER_REASON}
@@ -740,26 +964,34 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           </select>
         </div>
 
-        {/* Generate Button */}
-        <button
-          onClick={handleGenerate}
-          disabled={loading || !userType.trim() || !userAction.trim() || !userReason.trim() || !platform}
-          style={{
-            width: '100%',
-            padding: '12px 20px',
-            background: loading || !userType.trim() || !userAction.trim() || !userReason.trim() || !platform ? '#B0A898' : '#C8410A',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: '14px',
-            fontWeight: 500,
-            cursor: loading || !userType.trim() || !userAction.trim() || !userReason.trim() || !platform ? 'not-allowed' : 'pointer',
-            letterSpacing: '0.03em',
-          }}
-        >
-          {loading ? loadingMessages[loadingMessageIndex] : 'Generate Story'}
-        </button>
+	      {/* Helper text for demo mode */}
+		  
+
+		  {/* Generate button below */}
+		<button
+		  onClick={handleGenerate}
+		  disabled={loading || !userType.trim() || !userAction.trim() || !userReason.trim() || !platform}
+		  style={{
+			width: '100%',
+			padding: '12px 20px',
+			background: loading || !userType.trim() || !userAction.trim() || !userReason.trim() || !platform ? '#B0A898' : '#C8410A',
+			color: '#fff',
+			border: 'none',
+			borderRadius: '6px',
+			fontFamily: "'DM Sans', sans-serif",
+			fontSize: '14px',
+			fontWeight: 500,
+			cursor: loading || !userType.trim() || !userAction.trim() || !userReason.trim() || !platform ? 'not-allowed' : 'pointer',
+			letterSpacing: '0.03em',
+			transition: 'all 0.3s ease',
+			...(isDemoMode && !loading && !result ? {
+			  animation: 'pulse 2s ease-in-out infinite',
+			  boxShadow: '0 0 0 0 rgba(196, 77, 23, 0.7)',
+			} : {}),
+		  }}
+		>
+		  {loading ? loadingMessages[loadingMessageIndex] : 'Generate Story'}
+		</button>
 
         {/* Rate Limit Display */}
         {!isPaidTier && result?.rateLimit && (
@@ -809,7 +1041,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                   You've used your 200 stories this month
                 </div>
                 <div>
-                  Need more? <a href="mailto:hello@thekantancompany.com" style={{ color: 'var(--accent)', fontWeight: 500 }}>Contact us!</a>
+                  Need more? <a href="mailto:hello@kantanlabs.com" style={{ color: 'var(--accent)', fontWeight: 500 }}>Contact us!</a>
                 </div>
               </div>
             )}
@@ -833,12 +1065,13 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 
       {/* Results */}
       {result && (
-        <div style={{
-          background: 'var(--white)',
-          border: '1px solid var(--border)',
-          borderRadius: '8px',
-          padding: '24px',
-        }}>
+       <div id="story-result" style={{
+		    background: 'var(--white)',
+		    border: '1px solid var(--border)',
+		    borderRadius: '8px',
+		    padding: '24px',
+		    animation: highlightResult ? 'highlightFade 2s ease-out forwards' : 'none',
+		}}>
           <h2 style={{
             fontFamily: "'Shippori Mincho', serif",
             fontSize: '20px',
@@ -926,5 +1159,6 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
       </div> {/* Close demo wrapper */}
     </div> {/* Close relative positioned container */}
     </div>
-  );
+  </>
+);
 }

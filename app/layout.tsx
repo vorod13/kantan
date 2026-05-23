@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: 'Kantan — Specs, simplified.',
   description: 'Kantan turns a rough idea into a prioritized user story with acceptance criteria, RICE scoring, and a measurement plan in under 30 seconds. Built for product managers.',
-  authors: [{ name: 'The Kantan Company' }],
+  authors: [{ name: 'Kantan Labs' }],
   viewport: {
     width: 'device-width',
     initialScale: 1,
@@ -14,12 +14,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    url: 'https://thekantancompany.com/',
+    url: 'https://kantanlanbs.com/',
     title: 'Kantan — Specs, simplified.',
     description: 'Generate a complete user story, AC, RICE score, and measurement plan in under 30 seconds. Built for PMs who ship.',
     images: [
       {
-        url: 'https://thekantancompany.com/og-image.png',
+        url: 'https://kantanlabs.com/og-image.png',
       },
     ],
   },
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Kantan — Specs, simplified.',
     description: 'Generate a complete user story, AC, RICE score, and measurement plan in under 30 seconds.',
-    images: ['https://thekantancompany.com/og-image.png'],
+    images: ['https://kantanlabs.com/og-image.png'],
   },
   robots: {
     index: true,
@@ -57,7 +57,34 @@ export default function RootLayout({
           <meta name="ai" content="noai" />
           <meta name="noai" content="true" />
         </head>
-        <body>
+        <body style={{
+          position: 'relative',
+        }}>
+          {/* Subtle CSS noise texture overlay */}
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 9999,
+            opacity: 0.04,
+            backgroundImage: `repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 2px,
+              rgba(0, 0, 0, 0.03) 2px,
+              rgba(0, 0, 0, 0.03) 4px
+            ),
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 2px,
+              rgba(0, 0, 0, 0.03) 2px,
+              rgba(0, 0, 0, 0.03) 4px
+            )`,
+          }} />
           {children}
           <Analytics />
         </body>
