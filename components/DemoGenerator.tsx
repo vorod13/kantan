@@ -5,8 +5,7 @@ import React, { useState, useEffect } from 'react';
 import SampleMeasurement from '@/components/samples/SampleMeasurement';
 import SampleDashboard from '@/components/samples/SampleDashboard';
 import FirstTimeBanner from '@/components/FirstTimeBanner';
-import { useTypewriter } from '@/app/hooks/useTypewriter';
-import { DEMO_INPUT, DEMO_STORY_RESULT } from '@/lib/demoData';
+
 
 interface RICEScore {
   reach: { score: number; justification: string };
