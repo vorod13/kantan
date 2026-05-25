@@ -47,6 +47,7 @@ function HomePageContent() {
       {/* Generator Section - Inside Hero Flow */}
 		<section style={{
 		  padding: '0px 48px 100px',
+		  marginTop: '-60px',
 		  background: 'var(--paper)',
 		}} id="generator">
 		  <div style={{ maxWidth: '1200px' }}>

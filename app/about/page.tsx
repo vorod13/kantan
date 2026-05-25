@@ -11,7 +11,7 @@ export default function AboutPage() {
       
       {/* About Hero Section */}
       <section style={{
-        minHeight: '50vh',
+        minHeight: '90vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',

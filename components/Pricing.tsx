@@ -14,7 +14,8 @@ export default function Pricing() {
 
   return (
     <section style={{
-      padding: isSmallMobile ? '48px 16px' : isMobile ? '56px 20px' : '100px 48px',
+      padding: isSmallMobile ? '48px 16px' : isMobile ? '56px 20px' : '80px 48px',
+      scrollMarginTop: '80px',
     }} id="pricing">
       <div style={{ maxWidth: '1200px', margin: 0 }}>
         <div style={{
@@ -144,7 +145,7 @@ export default function Pricing() {
                 gap: '8px',
                 alignItems: 'flex-start',
               }}>
-                <span style={{ color: 'var(--accent)' }}>✓</span> 5 stories per week
+                <span style={{ color: 'var(--accent)' }}>✓</span> 3 stories per week
               </li>
               <li style={{
                 fontSize: '13px',
@@ -316,7 +317,7 @@ export default function Pricing() {
               </li>
             </ul>
             <a
-              href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+              href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
               style={{
                 display: 'block',
                 width: '100%',

@@ -51,6 +51,8 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
   const [hasGeneratedFirstStory, setHasGeneratedFirstStory] = useState(false);
   const [showDemoResult, setShowDemoResult] = useState(false);
   const [highlightResult, setHighlightResult] = useState(false);
+  const [showDelayedPaywall, setShowDelayedPaywall] = useState(false);
+  
 
   const loadingMessages = [
     'Thank you for your inputs',
@@ -145,13 +147,23 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 		  }
 		}, [selectedTier]);
 
-	// Check if user has generated first story
-	useEffect(() => {
-	  const hasGenerated = localStorage.getItem('hasGeneratedFirstStory');
-	  if (hasGenerated) {
-		setHasGeneratedFirstStory(true);
-	  }
-	}, []);
+		// Check if user has generated first story
+		useEffect(() => {
+		  const hasGenerated = localStorage.getItem('hasGeneratedFirstStory');
+		  if (hasGenerated) {
+			setHasGeneratedFirstStory(true);
+		  }
+		}, []);
+
+		// Delay paywall when user hits limit
+		React.useEffect(() => {
+		  if (isAtLimit && !showDelayedPaywall) {
+			const timer = setTimeout(() => {
+			  setShowDelayedPaywall(true);
+			}, 10000); // 10 seconds
+			return () => clearTimeout(timer);
+		  }
+		}, [isAtLimit, showDelayedPaywall]);
 
 	
 	// Handle "Try an example" from banner
@@ -287,10 +299,17 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 		}
 
 		setResult(data);
-	  } catch (err: any) {
-		setError(err.message);
-	  } finally {
-		setLoading(false);
+
+		// Clear input fields after successful generation
+		setUserType('');
+		setUserAction('');
+		setUserReason('');
+		setPlatform('');
+
+		} catch (err: any) {
+		  setError(err.message);
+		} finally {
+	      setLoading(false);
 	  }
 	};
 
@@ -335,11 +354,11 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 		}}>
 		
 		{/* First Time Interstitial - Free Tab Only */}
-		{selectedTier === 'free' && showInterstitial && (
-		  <FirstTimeBanner
-			onTryExample={handleTryExample}
-			onDismiss={handleDismissBanner}
-		  />
+		{selectedTier === 'free' && showInterstitial && !isSignedIn && (
+	    <FirstTimeBanner
+		onTryExample={handleTryExample}
+		onDismiss={handleDismissBanner}
+			/>
 		)}
 
         {/* Tier Toggle */}
@@ -520,7 +539,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
         )}
 
         {/* Paywall Overlay - Free Tier Hit Limit */}
-        {isSignedIn && !isPaidTier && isAtLimit && (
+        {isSignedIn && !isPaidTier && showDelayedPaywall && (
           <div style={{
             position: 'absolute',
             top: 0,
@@ -560,7 +579,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                 Upgrade to Solo for 200 stories/month and unlock unlimited potential.
               </p>
               <a
-                href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+                href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
                 style={{
                   display: 'inline-block',
                   padding: '14px 32px',
@@ -622,7 +641,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                 Generate 200 user stories per month with full access to all Solo features.
               </p>
               <a
-                href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+                href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
                 style={{
                   display: 'inline-block',
                   padding: '14px 32px',
@@ -743,12 +762,74 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 
         {/* Tab Content - Show samples for Measure/Dashboard tabs */}
         {activeTab === 'measure' && (
-          <SampleMeasurement subscriptionTier={subscriptionTier} />
-        )}
-        
-        {activeTab === 'dashboard' && (
-          <SampleDashboard subscriptionTier={subscriptionTier} />
-        )}
+		  <div style={{ position: 'relative' }}>
+			<SampleMeasurement subscriptionTier={subscriptionTier} />
+			<div style={{
+			  position: 'absolute',
+			  top: 0,
+			  left: 0,
+			  right: 0,
+			  bottom: 0,
+			  background: 'rgba(245, 242, 236, 0.95)',
+			  display: 'flex',
+			  alignItems: 'center',
+			  justifyContent: 'center',
+			  borderRadius: '8px',
+			}}>
+			  <div style={{
+				textAlign: 'center',
+				padding: '40px',
+			  }}>
+				<div style={{
+				  fontFamily: "'Shippori Mincho', serif",
+				  fontSize: '24px',
+				  fontWeight: 700,
+				  color: 'var(--ink)',
+				  marginBottom: '8px',
+				}}>Coming Very Soon</div>
+				<p style={{
+				  fontSize: '14px',
+				  color: 'var(--muted)',
+				}}>Measurement planning feature launching shortly</p>
+			  </div>
+			</div>
+		  </div>
+		)}
+
+		{activeTab === 'dashboard' && (
+		  <div style={{ position: 'relative' }}>
+			<SampleDashboard subscriptionTier={subscriptionTier} />
+			<div style={{
+			  position: 'absolute',
+			  top: 0,
+			  left: 0,
+			  right: 0,
+			  bottom: 0,
+			  background: 'rgba(245, 242, 236, 0.95)',
+			  display: 'flex',
+			  alignItems: 'center',
+			  justifyContent: 'center',
+			  borderRadius: '8px',
+			}}>
+			  <div style={{
+				textAlign: 'center',
+				padding: '40px',
+			  }}>
+				<div style={{
+				  fontFamily: "'Shippori Mincho', serif",
+				  fontSize: '24px',
+				  fontWeight: 700,
+				  color: 'var(--ink)',
+				  marginBottom: '8px',
+				}}>Coming Very Soon</div>
+				<p style={{
+				  fontSize: '14px',
+				  color: 'var(--muted)',
+				}}>Dashboard feature launching shortly</p>
+			  </div>
+			</div>
+		  </div>
+		)}
 
       {/* Input Form - Only show for Story tab */}
       {activeTab === 'story' && (
@@ -774,7 +855,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           <input
             type="text"
             value={userType}
-            onChange={(e) => handleUserInput('userType', e.target.value)}
+            onChange={(e) => setUserType(e.target.value)}
 			onFocus={() => {
 		    if (showDemoResult) {
 			setShowDemoResult(false);
@@ -818,7 +899,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           <input
             type="text"
             value={userAction}
-            onChange={(e) => handleUserInput('userType', e.target.value)}
+            onChange={(e) => setUserAction(e.target.value)}
 			onFocus={() => {
 		    if (showDemoResult) {
 			setShowDemoResult(false);
@@ -862,7 +943,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           <input
             type="text"
             value={userReason}
-            onChange={(e) => handleUserInput('userType', e.target.value)}
+            onChange={(e) => setUserReason(e.target.value)}
 			onFocus={() => {
 		    if (showDemoResult) {
 			setShowDemoResult(false);
@@ -1003,7 +1084,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             {result.rateLimit.remaining} of {result.rateLimit.limit} free stories remaining this week
             {result.rateLimit.remaining === 0 && (
               <div style={{ marginTop: '8px' }}>
-                <a href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01" style={{ color: 'var(--accent)', fontWeight: 500 }}>
+                <a href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601" style={{ color: 'var(--accent)', fontWeight: 500 }}>
                   Upgrade to Solo for 200 stories/month →
                 </a>
               </div>
@@ -1063,20 +1144,51 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
       </div>
 
       {/* Results */}
-      {result && (
-       <div id="story-result" style={{
-		    background: 'var(--white)',
-		    border: '1px solid var(--border)',
-		    borderRadius: '8px',
-		    padding: '24px',
-		    animation: highlightResult ? 'highlightFade 2s ease-out forwards' : 'none',
-		}}>
-          <h2 style={{
-            fontFamily: "'Shippori Mincho', serif",
-            fontSize: '20px',
-            fontWeight: 700,
-            color: 'var(--ink)',
-            marginBottom: '16px',
+	  {result && (
+	  <div id="story-result" style={{
+      background: 'var(--white)',
+      border: '1px solid var(--border)',
+      borderRadius: '8px',
+      padding: '24px',
+      animation: highlightResult ? 'highlightFade 2s ease-out forwards' : 'none',
+  }}>
+    
+      {/* Copy Button */}
+      <button
+      onClick={() => {
+        const copyText = `${result.userStory}\n\nAcceptance Criteria:\n${result.acceptanceCriteria.map((ac, idx) => `${idx + 1}. ${ac}`).join('\n')}`;
+        navigator.clipboard.writeText(copyText);
+      }}
+      style={{
+        float: 'right',
+        padding: '8px 16px',
+        background: 'var(--paper2)',
+        border: '1px solid var(--border)',
+        borderRadius: '6px',
+        fontSize: '12px',
+        fontWeight: 500,
+        color: 'var(--ink)',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.background = 'var(--accent)';
+        e.currentTarget.style.color = '#fff';
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.background = 'var(--paper2)';
+        e.currentTarget.style.color = 'var(--ink)';
+      }}
+    >
+      Copy Story + AC
+    </button>
+    
+    <h2 style={{
+        fontFamily: "'Shippori Mincho', serif",
+        fontSize: '20px',
+        fontWeight: 700,
+        color: 'var(--ink)',
+        marginBottom: '16px',
           }}>Generated Story</h2>
 
           <div style={{ marginBottom: '24px' }}>

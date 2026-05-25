@@ -23,7 +23,7 @@ export default function SampleDashboard({ subscriptionTier }: { subscriptionTier
             This is a sample dashboard blueprint. Upgrade to Solo to generate your own.
           </p>
           <a
-            href="https://buy.stripe.com/test_bJebJ14LD3EX2ZT5jjb7y01"
+            href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
             style={{
               display: 'inline-block',
               padding: '10px 24px',

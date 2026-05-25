@@ -140,15 +140,15 @@ export async function POST(req: NextRequest) {
         limit = 200;
         resetPeriodMs = 30 * 24 * 60 * 60 * 1000; // 30 days
       } else {
-        // Free tier authenticated: 5 per week
+        // Free tier authenticated: 3 per week
         rateLimitKey = `free-auth:${userId}`;
-        limit = 5;
+        limit = 3;
         resetPeriodMs = 7 * 24 * 60 * 60 * 1000; // 7 days
       }
     } else {
-      // Not authenticated: 5 per week (IP-based)
+      // Not authenticated: 3 per week (IP-based)
       rateLimitKey = `free-ip:${getRateLimitKey(req)}`;
-      limit = 5;
+      limit = 3;
       resetPeriodMs = 7 * 24 * 60 * 60 * 1000; // 7 days
     }
 
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
     if (!rateLimit.allowed) {
       const message = subscriptionTier === 'solo'
         ? "You've used your 200 stories this month. Need more? Contact us at hello@kantanlabs.com"
-        : 'Free tier is limited to 5 stories per week. Upgrade to Solo for 200 stories/month.';
+        : 'Free tier is limited to 3 stories per week. Upgrade to Solo for 200 stories/month.';
 
       return NextResponse.json(
         {

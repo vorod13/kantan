@@ -38,7 +38,7 @@ export default function Footer() {
         justifyContent: isMobile ? 'center' : 'flex-start',
       }}>
         <a
-          href="#"
+          href="/privacy"
           style={{
             fontSize: '12px',
             color: 'var(--dim)',
@@ -51,7 +51,7 @@ export default function Footer() {
           Privacy
         </a>
         <a
-          href="#"
+          href="/terms"
           style={{
             fontSize: '12px',
             color: 'var(--dim)',
@@ -64,7 +64,7 @@ export default function Footer() {
           Terms
         </a>
         <a
-          href="#"
+          href="mailto:hello@kantanlabs.com"
           style={{
             fontSize: '12px',
             color: 'var(--dim)',
