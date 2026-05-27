@@ -68,7 +68,7 @@ export default function AboutPage() {
           maxWidth: '680px',
           marginBottom: '24px',
         }}>
-          Simplicity is the ultimate sophistication.
+          Simplicity is the purest feature.
         </h1>
 
         <p style={{
