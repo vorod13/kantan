@@ -853,28 +853,30 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             display: 'block',
           }}>Who is the user?</label>
           <input
-            type="text"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
-			onFocus={() => {
-		    if (showDemoResult) {
-			setShowDemoResult(false);
-		    }
-		  }}
-            placeholder="e.g., a project manager"
-            disabled={loading}
-            maxLength={CHAR_LIMITS.USER_TYPE}
-            style={{
-              width: '100%',
-              background: 'var(--paper)',
-              border: '1px solid var(--border)',
-              borderRadius: '5px',
-              padding: '10px 14px',
-              fontSize: '13px',
-              color: 'var(--ink)',
-              fontFamily: "'DM Sans', sans-serif",
-            }}
-          />
+			  type="text"
+			  value={userType}
+			  onChange={isDemoMode ? undefined : (e) => setUserType(e.target.value)}
+			  onFocus={() => {
+				if (showDemoResult) {
+				  setShowDemoResult(false);
+				}
+			  }}
+			  placeholder="e.g., a project manager"
+			  disabled={loading}
+			  readOnly={isDemoMode}
+			  maxLength={CHAR_LIMITS.USER_TYPE}
+			  style={{
+				width: '100%',
+				background: 'var(--paper)',
+				border: '1px solid var(--border)',
+				borderRadius: '5px',
+				padding: '10px 14px',
+				fontSize: '13px',
+				color: 'var(--ink)',
+				fontFamily: "'DM Sans', sans-serif",
+				cursor: isDemoMode ? 'default' : 'text',
+			  }}
+			/>
           <div style={{
             fontSize: '10px',
             color: getCharCount(userType, CHAR_LIMITS.USER_TYPE).color,
@@ -897,28 +899,30 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             display: 'block',
           }}>What do they want to do?</label>
           <input
-            type="text"
-            value={userAction}
-            onChange={(e) => setUserAction(e.target.value)}
-			onFocus={() => {
-		    if (showDemoResult) {
-			setShowDemoResult(false);
-		    }
+			type="text"
+		  value={userAction}
+		  onChange={isDemoMode ? undefined : (e) => setUserAction(e.target.value)}
+		  onFocus={() => {
+			if (showDemoResult) {
+			  setShowDemoResult(false);
+			}
 		  }}
-            placeholder="e.g., export a task list as a CSV"
-            disabled={loading}
-            maxLength={CHAR_LIMITS.USER_ACTION}
-            style={{
-              width: '100%',
-              background: 'var(--paper)',
-              border: '1px solid var(--border)',
-              borderRadius: '5px',
-              padding: '10px 14px',
-              fontSize: '13px',
-              color: 'var(--ink)',
-              fontFamily: "'DM Sans', sans-serif",
-            }}
-          />
+		  placeholder="e.g., export a task list as a CSV"
+		  disabled={loading}
+		  readOnly={isDemoMode}
+		  maxLength={CHAR_LIMITS.USER_ACTION}
+		  style={{
+			width: '100%',
+			background: 'var(--paper)',
+			border: '1px solid var(--border)',
+			borderRadius: '5px',
+			padding: '10px 14px',
+			fontSize: '13px',
+			color: 'var(--ink)',
+			fontFamily: "'DM Sans', sans-serif",
+			cursor: isDemoMode ? 'default' : 'text',
+		  }}
+		/>
           <div style={{
             fontSize: '10px',
             color: getCharCount(userAction, CHAR_LIMITS.USER_ACTION).color,
@@ -941,28 +945,30 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             display: 'block',
           }}>Why do they want to do this?</label>
           <input
-            type="text"
-            value={userReason}
-            onChange={(e) => setUserReason(e.target.value)}
-			onFocus={() => {
-		    if (showDemoResult) {
-			setShowDemoResult(false);
-		    }
+			type="text"
+		  value={userReason}
+		  onChange={isDemoMode ? undefined : (e) => setUserReason(e.target.value)}
+		  onFocus={() => {
+			if (showDemoResult) {
+			  setShowDemoResult(false);
+			}
 		  }}
-            placeholder="e.g., so they can share progress with stakeholders"
-            disabled={loading}
-            maxLength={CHAR_LIMITS.USER_REASON}
-            style={{
-              width: '100%',
-              background: 'var(--paper)',
-              border: '1px solid var(--border)',
-              borderRadius: '5px',
-              padding: '10px 14px',
-              fontSize: '13px',
-              color: 'var(--ink)',
-              fontFamily: "'DM Sans', sans-serif",
-            }}
-          />
+		  placeholder="e.g., so they can share progress with stakeholders"
+		  disabled={loading}
+		  readOnly={isDemoMode}
+		  maxLength={CHAR_LIMITS.USER_REASON}
+		  style={{
+			width: '100%',
+			background: 'var(--paper)',
+			border: '1px solid var(--border)',
+			borderRadius: '5px',
+			padding: '10px 14px',
+			fontSize: '13px',
+			color: 'var(--ink)',
+			fontFamily: "'DM Sans', sans-serif",
+			cursor: isDemoMode ? 'default' : 'text',
+		  }}
+		/>
           <div style={{
             fontSize: '10px',
             color: getCharCount(userReason, CHAR_LIMITS.USER_REASON).color,
@@ -985,21 +991,22 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             display: 'block',
           }}>Platform</label>
           <select
-            value={platform}
-            onChange={(e) => setPlatform(e.target.value)}
-            disabled={loading}
-            style={{
-              width: '100%',
-              background: 'var(--paper)',
-              border: '1px solid var(--border)',
-              borderRadius: '5px',
-              padding: '10px 14px',
-              fontSize: '13px',
-              color: 'var(--ink)',
-              fontFamily: "'DM Sans', sans-serif",
-              cursor: 'pointer',
-            }}
-          >
+		    value={platform}
+		    onChange={isDemoMode ? undefined : (e) => setPlatform(e.target.value)}
+		    disabled={loading || isDemoMode}
+		    style={{
+			width: '100%',
+			background: 'var(--paper)',
+			border: '1px solid var(--border)',
+			borderRadius: '5px',
+			padding: '10px 14px',
+			fontSize: '13px',
+			color: 'var(--ink)',
+			fontFamily: "'DM Sans', sans-serif",
+			cursor: isDemoMode ? 'default' : 'pointer',
+			opacity: isDemoMode ? '0.7' : '1',
+		  }}
+>
             <option value="">Select platform...</option>
             <option value="Web">Web</option>
             <option value="iOS">iOS</option>
@@ -1022,21 +1029,22 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             display: 'block',
           }}>AC Format</label>
           <select
-            value={acFormat}
-            onChange={(e) => setAcFormat(e.target.value)}
-            disabled={loading}
-            style={{
-              width: '100%',
-              background: 'var(--paper)',
-              border: '1px solid var(--border)',
-              borderRadius: '5px',
-              padding: '10px 14px',
-              fontSize: '13px',
-              color: 'var(--ink)',
-              fontFamily: "'DM Sans', sans-serif",
-              cursor: 'pointer',
-            }}
-          >
+		  value={acFormat}
+		  onChange={isDemoMode ? undefined : (e) => setAcFormat(e.target.value)}
+		  disabled={loading || isDemoMode}
+		  style={{
+			width: '100%',
+			background: 'var(--paper)',
+			border: '1px solid var(--border)',
+			borderRadius: '5px',
+			padding: '10px 14px',
+			fontSize: '13px',
+			color: 'var(--ink)',
+			fontFamily: "'DM Sans', sans-serif",
+			cursor: isDemoMode ? 'default' : 'pointer',
+			opacity: isDemoMode ? '0.7' : '1',
+		  }}
+		>
             <option value="default">Kantan (default)</option>
             <option value="gherkin">Gherkin (Given/When/Then)</option>
             <option value="numbered">Numbered list</option>
