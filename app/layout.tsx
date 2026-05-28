@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/react';
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    url: 'https://kantanlanbs.com/',
+    url: 'https://kantanlabs.com/',
     title: 'Kantan — Specs, simplified.',
     description: 'Generate a complete user story, AC, RICE score, and measurement plan in under 30 seconds. Built for PMs who ship.',
     images: [
@@ -87,6 +88,7 @@ export default function RootLayout({
           }} />
           {children}
           <Analytics />
+          <GoogleAnalytics gaId="G-JVF45FMR3Y" />
         </body>
       </html>
     </ClerkProvider>
