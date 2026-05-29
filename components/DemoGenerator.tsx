@@ -2,7 +2,7 @@
 
 import { SignIn } from '@clerk/nextjs';
 import React, { useState, useEffect } from 'react';
-import SampleMeasurement from '@/components/samples/SampleMeasurement';
+import MeasurementPlan from '@/components/MeasurementPlan';
 import SampleDashboard from '@/components/samples/SampleDashboard';
 import FirstTimeBanner from '@/components/FirstTimeBanner';
 
@@ -24,6 +24,37 @@ interface StoryResult {
     remaining: number;
     limit: number;
   };
+}
+
+interface MeasurementPlanData {
+  northStar: {
+    name: string;
+    description: string;
+    metricType: string;
+    cohortWindow: string;
+    analyticsPlatform: string;
+    target: string;
+  };
+  leadingIndicators: {
+    name: string;
+    measure: string;
+    benchmark: string;
+    target: string;
+    predicts: string;
+    signal: string;
+  }[];
+  guardrails: {
+    name: string;
+    threshold: string;
+    benchmark: string;
+    measure: string;
+    signal: string;
+  }[];
+  eventSchema: {
+    eventName: string;
+    description: string;
+    properties: string[];
+  }[];
 }
 
 // Character limits
@@ -52,6 +83,9 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
   const [showDemoResult, setShowDemoResult] = useState(false);
   const [highlightResult, setHighlightResult] = useState(false);
   const [showDelayedPaywall, setShowDelayedPaywall] = useState(false);
+  const [measurementPlan, setMeasurementPlan] = useState<MeasurementPlanData | null>(null);
+  const [measurementLoading, setMeasurementLoading] = useState(false);
+  const [measurementError, setMeasurementError] = useState('');
   
 
   const loadingMessages = [
@@ -300,11 +334,48 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 
 		setResult(data);
 
+		// Store inputs before clearing (needed for measurement plan)
+		const storedUserType = userType;
+		const storedUserAction = userAction;
+		const storedUserReason = userReason;
+		const storedPlatform = platform;
+
 		// Clear input fields after successful generation
 		setUserType('');
 		setUserAction('');
 		setUserReason('');
 		setPlatform('');
+
+		// Trigger measurement plan generation in background
+			if (isSignedIn && isPaidTier) {
+			  setMeasurementPlan(null);
+			  setMeasurementLoading(true);
+			  setMeasurementError('');
+		  
+		  fetch('/api/generate-measurement', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+			  userType: storedUserType,
+			  userAction: storedUserAction,
+			  userReason: storedUserReason,
+			  platform: storedPlatform,
+			  userStory: data.userStory,
+			  acceptanceCriteria: data.acceptanceCriteria,
+			}),
+		  })
+		  .then(res => res.json())
+		  .then(measurementData => {
+		  console.log('Measurement API response:', JSON.stringify(measurementData)); // ADD THIS
+		  if (measurementData.error) {
+			setMeasurementError(measurementData.message || 'Failed to generate measurement plan');
+		  } else {
+			setMeasurementPlan(measurementData);
+		  }
+		})
+		  .catch(() => setMeasurementError('Failed to generate measurement plan'))
+		  .finally(() => setMeasurementLoading(false));
+		}
 
 		} catch (err: any) {
 		  setError(err.message);
@@ -761,39 +832,47 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
         </div>
 
         {/* Tab Content - Show samples for Measure/Dashboard tabs */}
-        {activeTab === 'measure' && (
-		  <div style={{ position: 'relative' }}>
-			<SampleMeasurement subscriptionTier={subscriptionTier} />
-			<div style={{
-			  position: 'absolute',
-			  top: 0,
-			  left: 0,
-			  right: 0,
-			  bottom: 0,
-			  background: 'rgba(245, 242, 236, 0.95)',
-			  display: 'flex',
-			  alignItems: 'center',
-			  justifyContent: 'center',
-			  borderRadius: '8px',
-			}}>
-			  <div style={{
-				textAlign: 'center',
-				padding: '40px',
-			  }}>
-				<div style={{
-				  fontFamily: "'Shippori Mincho', serif",
-				  fontSize: '24px',
-				  fontWeight: 700,
-				  color: 'var(--ink)',
-				  marginBottom: '8px',
-				}}>Coming Very Soon</div>
-				<p style={{
-				  fontSize: '14px',
-				  color: 'var(--muted)',
-				}}>Measurement planning feature launching shortly</p>
-			  </div>
-			</div>
-		  </div>
+		{activeTab === 'measure' && (
+		  <>
+			{/* Free tier (signed in or not) - show sample + upsell */}
+			{!isPaidTier && (
+			  <SampleMeasurement subscriptionTier={subscriptionTier} />
+			)}
+
+			{/* Paid tier - show real generated measurement plan */}
+			{isPaidTier && (
+			  <>
+				{!result && !measurementLoading && (
+				  <div style={{ padding: '48px', textAlign: 'center', color: 'var(--muted)', fontSize: '14px' }}>
+					Generate a story first to see your measurement plan.
+				  </div>
+				)}
+				{measurementLoading && (
+				  <div style={{ padding: '48px', textAlign: 'center' }}>
+					<div style={{
+					  fontFamily: "'Shippori Mincho', serif",
+					  fontSize: '18px',
+					  color: 'var(--ink)',
+					  marginBottom: '8px',
+					}}>
+					  {loadingMessages[loadingMessageIndex]}
+					</div>
+					<div style={{ fontSize: '13px', color: 'var(--muted)' }}>
+					  Generating your measurement plan...
+					</div>
+				  </div>
+				)}
+				{measurementError && (
+				  <div style={{ padding: '24px', color: '#C00', fontSize: '13px' }}>
+					{measurementError}
+				  </div>
+				)}
+				{measurementPlan && !measurementLoading && (
+				  <MeasurementPlan data={measurementPlan} isPaidTier={isPaidTier} />
+				)}
+			  </>
+			)}
+		  </>
 		)}
 
 		{activeTab === 'dashboard' && (
@@ -1164,7 +1243,16 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
       {/* Copy Button */}
       <button
       onClick={() => {
-        const copyText = `${result.userStory}\n\nAcceptance Criteria:\n${result.acceptanceCriteria.map((ac, idx) => `${idx + 1}. ${ac}`).join('\n')}`;
+        let copyText = `${result.userStory}\n\nAcceptance Criteria:\n${result.acceptanceCriteria.map((ac, idx) => `${idx + 1}. ${ac}`).join('\n')}`;
+
+		if (measurementPlan) {
+		  copyText += `\n\nMeasurement Plan\n`;
+		  copyText += `North Star: ${measurementPlan.northStar.name} — ${measurementPlan.northStar.description}\n`;
+		  copyText += `Target: ${measurementPlan.northStar.target}\n\n`;
+		  copyText += `Leading Indicators:\n${measurementPlan.leadingIndicators.map(i => `• ${i.name}: ${i.description}`).join('\n')}\n\n`;
+		  copyText += `Guardrails:\n${measurementPlan.guardrails.map(g => `• ${g.name}: ${g.threshold} — ${g.description}`).join('\n')}\n\n`;
+		  copyText += `Event Tracking:\n${measurementPlan.eventSchema.map(e => `• ${e.eventName}: ${e.description}`).join('\n')}`;
+		}
         navigator.clipboard.writeText(copyText);
       }}
       style={{
