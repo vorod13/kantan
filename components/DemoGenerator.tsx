@@ -3,6 +3,7 @@
 import { SignIn } from '@clerk/nextjs';
 import React, { useState, useEffect } from 'react';
 import MeasurementPlan from '@/components/MeasurementPlan';
+import SampleMeasurement from '@/components/samples/SampleMeasurement';
 import SampleDashboard from '@/components/samples/SampleDashboard';
 import FirstTimeBanner from '@/components/FirstTimeBanner';
 
