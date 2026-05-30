@@ -1244,18 +1244,9 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
       {/* Copy Button */}
       <button
       onClick={() => {
-        let copyText = `${result.userStory}\n\nAcceptance Criteria:\n${result.acceptanceCriteria.map((ac, idx) => `${idx + 1}. ${ac}`).join('\n')}`;
-
-		if (measurementPlan) {
-		  copyText += `\n\nMeasurement Plan\n`;
-		  copyText += `North Star: ${measurementPlan.northStar.name}\n`;
-		  copyText += `Target: ${measurementPlan.northStar.target}\n\n`;
-		  copyText += `Leading Indicators:\n${measurementPlan.leadingIndicators.map(i => `• ${i.name}\n  Measure: ${i.measure}\n  Target: ${i.target}\n  Signal: ${i.signal}`).join('\n')}\n\n`;
-		  copyText += `Guardrails:\n${measurementPlan.guardrails.map(g => `• ${g.name} ${g.threshold}\n  Signal: ${g.signal}`).join('\n')}\n\n`;
-		  copyText += `Event Tracking:\n${measurementPlan.eventSchema.map(e => `• ${e.eventName}: ${e.description}`).join('\n')}`;
-		}
-        navigator.clipboard.writeText(copyText);
-      }}
+  const copyText = `${result.userStory}\n\nAcceptance Criteria:\n${result.acceptanceCriteria.map((ac, idx) => `${idx + 1}. ${ac}`).join('\n')}`;
+	  navigator.clipboard.writeText(copyText);
+	  }}
       style={{
         float: 'right',
         padding: '8px 16px',

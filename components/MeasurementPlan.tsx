@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 
 interface NorthStar {
   name: string;
@@ -61,6 +62,31 @@ const fieldValue = {
 };
 
 export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    let copyText = `MEASUREMENT PLAN\n\n`;
+    copyText += `North Star: ${data.northStar.name}\n`;
+    copyText += `Target: ${data.northStar.target}\n`;
+    copyText += `Metric Type: ${data.northStar.metricType} | Cohort: ${data.northStar.cohortWindow} | Platform: ${data.northStar.analyticsPlatform}\n\n`;
+    copyText += `LEADING INDICATORS\n`;
+    copyText += data.leadingIndicators.map(i =>
+      `• ${i.name}\n  Measure: ${i.measure}\n  Benchmark: ${i.benchmark}\n  Target: ${i.target}\n  Predicts: ${i.predicts}\n  Signal: ${i.signal}`
+    ).join('\n') + '\n\n';
+    copyText += `GUARDRAILS\n`;
+    copyText += data.guardrails.map(g =>
+      `• ${g.name} (${g.threshold})\n  Measure: ${g.measure}\n  Benchmark: ${g.benchmark}\n  Signal: ${g.signal}`
+    ).join('\n') + '\n\n';
+    copyText += `EVENT TRACKING\n`;
+    copyText += data.eventSchema.map(e =>
+      `• ${e.eventName}: ${e.description}\n  ${e.properties.join(', ')}`
+    ).join('\n');
+
+    navigator.clipboard.writeText(copyText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div style={{ padding: '24px' }}>
 
@@ -103,13 +129,51 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
         borderRadius: '8px',
         padding: '24px',
       }}>
-        <h2 style={{
-          fontFamily: "'Shippori Mincho', serif",
-          fontSize: '20px',
-          fontWeight: 700,
-          color: 'var(--ink)',
+
+        {/* Header with copy button */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           marginBottom: '24px',
-        }}>Measurement Plan</h2>
+        }}>
+          <h2 style={{
+            fontFamily: "'Shippori Mincho', serif",
+            fontSize: '20px',
+            fontWeight: 700,
+            color: 'var(--ink)',
+            margin: 0,
+          }}>Measurement Plan</h2>
+
+          <button
+            onClick={handleCopy}
+            style={{
+              padding: '8px 16px',
+              background: copied ? 'var(--accent)' : 'var(--paper2)',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 500,
+              color: copied ? '#fff' : 'var(--ink)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => {
+              if (!copied) {
+                e.currentTarget.style.background = 'var(--accent)';
+                e.currentTarget.style.color = '#fff';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!copied) {
+                e.currentTarget.style.background = 'var(--paper2)';
+                e.currentTarget.style.color = 'var(--ink)';
+              }
+            }}
+          >
+            {copied ? 'Copied!' : 'Copy Measurement Plan'}
+          </button>
+        </div>
 
         {/* ── NORTH STAR ── */}
         <div style={{ marginBottom: '24px' }}>
@@ -124,7 +188,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
             borderRadius: '6px',
             overflow: 'hidden',
           }}>
-            {/* Name + description */}
             <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
               <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ink)', marginBottom: '4px' }}>
                 {data.northStar.name}
@@ -134,7 +197,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
               </div>
             </div>
 
-            {/* 4-cell grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
               {[
                 { label: 'Metric Type', value: data.northStar.metricType },
@@ -177,7 +239,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                 borderRadius: '6px',
                 overflow: 'hidden',
               }}>
-                {/* Name bar */}
                 <div style={{
                   padding: '8px 14px',
                   borderBottom: '1px solid var(--border)',
@@ -188,16 +249,11 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                   {indicator.name}
                 </div>
 
-                {/* Fields */}
                 <div style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-
-                  {/* Measure - full width */}
                   <div>
                     <div style={sectionLabel}>Measure</div>
                     <div style={fieldValue}>{indicator.measure}</div>
                   </div>
-
-                  {/* Benchmark + Target - side by side */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
                       <div style={sectionLabel}>Benchmark</div>
@@ -210,14 +266,10 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                       </div>
                     </div>
                   </div>
-
-                  {/* Predicts - full width */}
                   <div>
                     <div style={sectionLabel}>Predicts</div>
                     <div style={fieldValue}>{indicator.predicts}</div>
                   </div>
-
-                  {/* Signal - highlighted */}
                   <div style={{
                     background: 'rgba(200, 65, 10, 0.05)',
                     border: '1px solid rgba(200, 65, 10, 0.15)',
@@ -227,7 +279,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                     <div style={{ ...sectionLabel, color: 'var(--accent)', marginBottom: '2px' }}>Signal</div>
                     <div style={{ ...fieldValue, fontSize: '12px' }}>{indicator.signal}</div>
                   </div>
-
                 </div>
               </div>
             ))}
@@ -249,7 +300,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                 borderRadius: '6px',
                 overflow: 'hidden',
               }}>
-                {/* Name + threshold pill - single row */}
                 <div style={{
                   padding: '8px 14px',
                   borderBottom: '1px solid var(--border)',
@@ -283,7 +333,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                   </div>
                 </div>
 
-                {/* Fields */}
                 <div style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
@@ -295,8 +344,6 @@ export default function MeasurementPlan({ data, isPaidTier }: MeasurementPlanPro
                       <div style={fieldValue}>{guardrail.benchmark}</div>
                     </div>
                   </div>
-
-                  {/* Signal */}
                   <div style={{
                     background: 'rgba(200, 65, 10, 0.05)',
                     border: '1px solid rgba(200, 65, 10, 0.15)',
