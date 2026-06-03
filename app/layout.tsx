@@ -34,6 +34,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://kantanlabs.com',
+  },
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23C8410A'/><text x='50%' y='50%' font-size='18' text-anchor='middle' dominant-baseline='central' font-family='serif' fill='white'>か</text></svg>",
   },

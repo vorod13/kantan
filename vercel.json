@@ -39,5 +39,13 @@
       "source": "/",
       "destination": "/index.html"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{"type": "host", "value": "www.kantanlabs.com"}],
+      "destination": "https://kantanlabs.com/:path*",
+      "permanent": true
+    }
   ]
 }
