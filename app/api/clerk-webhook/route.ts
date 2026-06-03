@@ -53,17 +53,23 @@ export async function POST(req: Request) {
 
         console.log('New user created:', userId, email);
 
-        // Initialize user metadata to 'free' tier
-        const client = await clerkClient();
-        await client.users.updateUserMetadata(userId, {
-          publicMetadata: {
-            subscriptionTier: 'free',
-            createdAt: new Date().toISOString(),
-            source: 'clerk_signup',
-          },
-        });
+     // Check if user already has a subscription tier (e.g. set by Stripe webhook)
+		const existingTier = data.public_metadata?.subscriptionTier;
 
-        console.log(`✅ Initialized user ${userId} to free tier`);
+		if (!existingTier) {
+		  // Initialize to free tier only if no tier already set
+		  const client = await clerkClient();
+		  await client.users.updateUserMetadata(userId, {
+			publicMetadata: {
+			  subscriptionTier: 'free',
+			  createdAt: new Date().toISOString(),
+			  source: 'clerk_signup',
+			},
+		  });
+		  console.log(`✅ Initialized user ${userId} to free tier`);
+		} else {
+		  console.log(`ℹ️ User ${userId} already has tier: ${existingTier} — skipping free tier init`);
+		}
         break;
       }
 
