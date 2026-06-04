@@ -35,7 +35,7 @@ export default function Pricing() {
           color: 'var(--ink)',
           maxWidth: '640px',
           marginBottom: '20px',
-        }}>Pricing, like the name.</h2>
+        }}>Easy, like the name.</h2>
 
         {/* Billing Toggle */}
         <div style={{
