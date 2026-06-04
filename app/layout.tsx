@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: 'Kantan — User Story Generator for Product Managers',
-  description: 'Kantan turns a rough idea into a prioritized user story with acceptance criteria, RICE scoring, and a measurement plan in under 30 seconds. Built for product managers.',
+  description: 'Kantan turns a rough idea into a prioritized user story with acceptance criteria, RICE scoring, and a measurement plan in seconds. Built for product managers.',
   authors: [{ name: 'Kantan Labs' }],
   viewport: {
     width: 'device-width',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://kantanlabs.com/',
     title: 'Kantan — User Story Generator for Product Managers',
-    description: 'Generate a complete user story, AC, RICE score, and measurement plan in under 30 seconds. Built for PMs who ship.',
+    description: 'Generate a complete user story, AC, RICE score, and measurement plan in seconds. Built for PMs who ship.',
     images: [
       {
         url: 'https://kantanlabs.com/og-image.png',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Kantan — User Story Generator for Product Managers',
-    description: 'Generate a complete user story, AC, RICE score, and measurement plan in under 30 seconds.',
+    description: 'Generate a complete user story, AC, RICE score, and measurement plan in seconds.',
     images: ['https://kantanlabs.com/og-image.png'],
   },
   robots: {
