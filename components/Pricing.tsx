@@ -317,7 +317,7 @@ export default function Pricing() {
               </li>
             </ul>
             <a
-              href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
+              href={process.env.NEXT_PUBLIC_STRIPE_SOLO_LINK}
               style={{
                 display: 'block',
                 width: '100%',
