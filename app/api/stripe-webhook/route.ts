@@ -12,6 +12,47 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
+function buildAccessEmail(tier: string, signInUrl: string): string {
+  const isFounding = tier === 'founding';
+  return `
+    <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; background: #F5F2EC;">
+      <div style="margin-bottom: 32px;">
+        <span style="font-family: serif; font-size: 24px; font-weight: 700; color: #0D0D0D;">かんたん</span>
+        <span style="font-family: Arial, sans-serif; font-size: 13px; font-weight: 500; color: #888780; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 10px;">Kantan</span>
+      </div>
+      
+      <h1 style="font-family: serif; font-size: 28px; font-weight: 700; color: #0D0D0D; margin-bottom: 16px; line-height: 1.2;">
+        Your ${isFounding ? 'Founding' : 'Solo'} access is ready.
+      </h1>
+      
+      <p style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 24px;">
+        Thank you for ${isFounding ? 'becoming a Founding member of' : 'subscribing to'} Kantan. 
+        Your ${isFounding ? '$9' : '$19'}/month subscription is active and your account is ready.
+      </p>
+
+      <p style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 32px;">
+        Click below to sign in and start generating user stories, acceptance criteria, and measurement plans instantly.
+      </p>
+      
+      <a href="${signInUrl}" 
+         style="display: inline-block; padding: 14px 32px; background: #C8410A; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+        Access Kantan →
+      </a>
+      
+      <p style="font-size: 13px; color: #888780; margin-top: 32px; line-height: 1.6;">
+        This link expires in 24 hours. If you need a new one, visit 
+        <a href="https://kantanlabs.com" style="color: #C8410A;">kantanlabs.com</a> 
+        and sign in with your email.
+      </p>
+
+      <p style="font-size: 13px; color: #888780; margin-top: 16px;">
+        Questions? Reply to this email or reach us at 
+        <a href="mailto:hello@kantanlabs.com" style="color: #C8410A;">hello@kantanlabs.com</a>
+      </p>
+    </div>
+  `;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.text();
@@ -74,10 +115,8 @@ export async function POST(req: Request) {
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed': {
-        // Handle checkout completion - has email embedded, works in test mode
         const session = event.data.object as Stripe.Checkout.Session;
         
-        // Get customer email from session (always available)
         const customerEmail = session.customer_email || session.customer_details?.email;
         
         if (!customerEmail) {
@@ -87,7 +126,6 @@ export async function POST(req: Request) {
         
         console.log('Checkout completed for:', customerEmail);
         
-        // Get the subscription ID from the session
         const subscriptionId = session.subscription as string;
         
         if (!subscriptionId) {
@@ -95,13 +133,12 @@ export async function POST(req: Request) {
           return NextResponse.json({ received: true, skipped: 'no_subscription' });
         }
         
-        // Get price from the session's amount_total (already in the event, no need to retrieve)
+        // Detect tier from amount_total
         let tier = 'solo';
-        const amountTotal = session.amount_total; // This is in cents
+        const amountTotal = session.amount_total;
         
         console.log('Payment amount from session:', amountTotal);
         
-        // Differentiate between Founding ($9 = 900 cents) and Solo ($19 = 1900 cents)
         if (amountTotal === 900) {
           tier = 'founding';
           console.log('✅ Detected Founding tier ($9.00)');
@@ -112,92 +149,60 @@ export async function POST(req: Request) {
           console.log('⚠️ Unknown payment amount:', amountTotal, 'cents - defaulting to solo');
         }
         
-        // Find Clerk user by email
         const client = await clerkClient();
         const users = await client.users.getUserList({
           emailAddress: [customerEmail],
         });
         
         if (users.data.length > 0) {
-		  const user = users.data[0];
-		  
-		  // DEDUPLICATION: Check if we've already processed this event
-		  const processedEvents = (user.privateMetadata?.processedWebhookEvents as string[]) || [];
-		  
-		  if (processedEvents.includes(eventId)) {
-			console.log(`⚠️ Duplicate event detected: ${eventId} already processed for user ${user.id}`);
-			return NextResponse.json({ received: true, skipped: 'duplicate_event' });
-		  }
-		  
-		  // Update user metadata with subscription info + add event to processed list
-		  await client.users.updateUserMetadata(user.id, {
-			publicMetadata: {
-			  subscriptionTier: tier,
-			  stripeCustomerId: session.customer,
-			  stripeSubscriptionId: subscriptionId,
-			  subscriptionStatus: 'active',
-			},
-			privateMetadata: {
-			  processedWebhookEvents: [...processedEvents, eventId].slice(-50),
-			},
-		  });
-		  console.log(`✅ Updated user ${user.id} to ${tier} tier via checkout.session.completed`);
+          // User EXISTS → update metadata + send magic link
+          const user = users.data[0];
+          
+          // DEDUPLICATION
+          const processedEvents = (user.privateMetadata?.processedWebhookEvents as string[]) || [];
+          
+          if (processedEvents.includes(eventId)) {
+            console.log(`⚠️ Duplicate event detected: ${eventId} already processed for user ${user.id}`);
+            return NextResponse.json({ received: true, skipped: 'duplicate_event' });
+          }
+          
+          await client.users.updateUserMetadata(user.id, {
+            publicMetadata: {
+              subscriptionTier: tier,
+              stripeCustomerId: session.customer,
+              stripeSubscriptionId: subscriptionId,
+              subscriptionStatus: 'active',
+              previousTier: user.publicMetadata?.subscriptionTier || 'free',
+            },
+            privateMetadata: {
+              processedWebhookEvents: [...processedEvents, eventId].slice(-50),
+            },
+          });
+          console.log(`✅ Updated user ${user.id} to ${tier} tier via checkout.session.completed`);
 
-		  // Send magic link email to existing Founding tier users
-		  if (tier === 'founding') {
-			try {
-			  const signInToken = await client.signInTokens.createSignInToken({
-				userId: user.id,
-				expiresInSeconds: 86400, // 24 hours
-			  });
-			  console.log(`✅ Magic link token created for existing user ${customerEmail}`);
+          // Send magic link for ALL paid tiers
+          try {
+            const signInToken = await client.signInTokens.createSignInToken({
+              userId: user.id,
+              expiresInSeconds: 86400,
+            });
+            console.log(`✅ Magic link token created for existing user ${customerEmail}`);
 
-			  await resend.emails.send({
-				from: 'Kantan Labs <hello@kantanlabs.com>',
-				to: customerEmail,
-				subject: 'Your Kantan Founding access is ready',
-				html: `
-				  <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; background: #F5F2EC;">
-					<div style="margin-bottom: 32px;">
-					  <span style="font-family: serif; font-size: 24px; font-weight: 700; color: #0D0D0D;">かんたん</span>
-					  <span style="font-family: Arial, sans-serif; font-size: 13px; font-weight: 500; color: #888780; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 10px;">Kantan</span>
-					</div>
-					
-					<h1 style="font-family: serif; font-size: 28px; font-weight: 700; color: #0D0D0D; margin-bottom: 16px; line-height: 1.2;">
-					  Your Founding access is ready.
-					</h1>
-					
-					<p style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 24px;">
-					  Thank you for becoming a Founding member of Kantan. Your $9/month subscription is active and your account is ready.
-					</p>
+            await resend.emails.send({
+              from: 'Kantan Labs <hello@kantanlabs.com>',
+              to: customerEmail,
+              subject: tier === 'founding'
+                ? 'Your Kantan Founding access is ready'
+                : 'Your Kantan Solo access is ready',
+              html: buildAccessEmail(tier, signInToken.url),
+            });
+            console.log(`✅ Access email sent to existing user ${customerEmail}`);
+          } catch (emailError: any) {
+            console.error(`❌ Failed to send access email to existing user ${customerEmail}:`, emailError.message);
+          }
 
-					<p style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 32px;">
-					  Click below to sign in and start generating user stories, acceptance criteria, and measurement plans instantly.
-					</p>
-
-					<a href="${signInToken.url}" style="display: inline-block; background: #C8410A; color: #fff; font-size: 15px; font-weight: 600; padding: 14px 28px; border-radius: 6px; text-decoration: none; margin-bottom: 32px;">
-					  Access Kantan →
-					</a>
-
-					<p style="font-size: 13px; color: #888780; margin-top: 32px; line-height: 1.6;">
-					  This link expires in 24 hours. If you need a new one, visit 
-					  <a href="https://kantanlabs.com" style="color: #C8410A;">kantanlabs.com</a> 
-					  and sign in with your email.
-					</p>
-
-					<p style="font-size: 13px; color: #888780; margin-top: 16px;">
-					  Questions? Reply to this email or reach us at 
-					  <a href="mailto:hello@kantanlabs.com" style="color: #C8410A;">hello@kantanlabs.com</a>
-					</p>
-				  </div>
-				`,
-			  });
-			  console.log(`✅ Founding access email sent to existing user ${customerEmail}`);
-			} catch (tokenError: any) {
-			  console.error(`❌ Failed to send magic link to existing user ${customerEmail}:`, tokenError.message);
-			}
-		  }
-		} else {
+        } else {
+          // User does NOT EXIST → create + send magic link
           console.log(`⚠️ No Clerk user found with email: ${customerEmail} — creating new Clerk user`);
           
           try {
@@ -216,58 +221,22 @@ export async function POST(req: Request) {
             });
             console.log(`✅ Created new Clerk user ${newUser.id} with ${tier} tier`);
 
-            // Send magic link so user can access their paid tier immediately
             try {
               const signInToken = await client.signInTokens.createSignInToken({
                 userId: newUser.id,
-                expiresInSeconds: 86400, // 24 hours to click the link
+                expiresInSeconds: 86400,
               });
-              console.log(`✅ Magic link token created for ${customerEmail}`);
+              console.log(`✅ Magic link token created for new user ${customerEmail}`);
 
-			// Send magic link via Resend
-			await resend.emails.send({
-			  from: 'Kantan Labs <hello@kantanlabs.com>',
-			  to: customerEmail,
-			  subject: 'Your Kantan Founding access is ready',
-			  html: `
-				<div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; background: #F5F2EC;">
-				  <div style="margin-bottom: 32px;">
-					<span style="font-family: serif; font-size: 24px; font-weight: 700; color: #0D0D0D;">かんたん</span>
-					<span style="font-family: Arial, sans-serif; font-size: 13px; font-weight: 500; color: #888780; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 10px;">Kantan</span>
-				  </div>
-				  
-				  <h1 style="font-family: serif; font-size: 28px; font-weight: 700; color: #0D0D0D; margin-bottom: 16px; line-height: 1.2;">
-					Your Founding access is ready.
-				  </h1>
-				  
-				  <p style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 24px;">
-					Thank you for becoming a Founding member of Kantan. Your $9/month subscription is active and your account is ready.
-				  </p>
-
-				  <p style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 32px;">
-					Click below to sign in and start generating user stories, acceptance criteria, and measurement plans instantly.
-				  </p>
-				  
-				  <a href="${signInToken.url}" 
-					 style="display: inline-block; padding: 14px 32px; background: #C8410A; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
-					Access Kantan →
-				  </a>
-				  
-				  <p style="font-size: 13px; color: #888780; margin-top: 32px; line-height: 1.6;">
-					This link expires in 24 hours. If you need a new one, visit 
-					<a href="https://kantanlabs.com" style="color: #C8410A;">kantanlabs.com</a> 
-					and sign in with your email.
-				  </p>
-
-				  <p style="font-size: 13px; color: #888780; margin-top: 16px;">
-					Questions? Reply to this email or reach us at 
-					<a href="mailto:hello@kantanlabs.com" style="color: #C8410A;">hello@kantanlabs.com</a>
-				  </p>
-				</div>
-			  `,
-			});
-			  console.log(`✅ Access email sent to ${customerEmail}`);
-			  
+              await resend.emails.send({
+                from: 'Kantan Labs <hello@kantanlabs.com>',
+                to: customerEmail,
+                subject: tier === 'founding'
+                  ? 'Your Kantan Founding access is ready'
+                  : 'Your Kantan Solo access is ready',
+                html: buildAccessEmail(tier, signInToken.url),
+              });
+              console.log(`✅ Access email sent to new user ${customerEmail}`);
             } catch (tokenError: any) {
               console.error(`❌ Failed to create magic link for ${customerEmail}:`, tokenError.message);
             }
