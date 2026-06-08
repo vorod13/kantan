@@ -651,7 +651,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                 Upgrade to Solo for 200 stories/month and unlock unlimited potential.
               </p>
               <a
-                href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
+                href={process.env.NEXT_PUBLIC_STRIPE_SOLO_LINK}
                 style={{
                   display: 'inline-block',
                   padding: '14px 32px',
@@ -713,7 +713,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                 Generate 200 user stories per month with full access to all Solo features.
               </p>
               <a
-                href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601"
+                href={process.env.NEXT_PUBLIC_STRIPE_SOLO_LINK}
                 style={{
                   display: 'inline-block',
                   padding: '14px 32px',
@@ -1172,7 +1172,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
             {result.rateLimit.remaining} of {result.rateLimit.limit} free stories remaining this week
             {result.rateLimit.remaining === 0 && (
               <div style={{ marginTop: '8px' }}>
-                <a href="https://buy.stripe.com/28E28reqi4nIb1qdYXbV601" style={{ color: 'var(--accent)', fontWeight: 500 }}>
+                <a href={process.env.NEXT_PUBLIC_STRIPE_SOLO_LINK} style={{ color: 'var(--accent)', fontWeight: 500 }}>
                   Upgrade to Solo for 200 stories/month →
                 </a>
               </div>
