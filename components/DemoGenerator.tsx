@@ -60,9 +60,9 @@ interface MeasurementPlanData {
 
 // Character limits
 const CHAR_LIMITS = {
-  USER_TYPE: 80,
-  USER_ACTION: 120,
-  USER_REASON: 150,
+  USER_TYPE: 200,
+  USER_ACTION: 350,
+  USER_REASON: 350,
 } as const;
 
 export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscriptionTier: string; isSignedIn: boolean }) {
@@ -71,6 +71,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
   const [userReason, setUserReason] = useState('');
   const [platform, setPlatform] = useState('');
   const [acFormat, setAcFormat] = useState('default');
+  const [resultAcFormat, setResultAcFormat] = useState('default');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<StoryResult | null>(null);
   const [error, setError] = useState('');
@@ -83,7 +84,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
   const [hasGeneratedFirstStory, setHasGeneratedFirstStory] = useState(false);
   const [showDemoResult, setShowDemoResult] = useState(false);
   const [highlightResult, setHighlightResult] = useState(false);
-  const [showDelayedPaywall, setShowDelayedPaywall] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [measurementPlan, setMeasurementPlan] = useState<MeasurementPlanData | null>(null);
   const [measurementLoading, setMeasurementLoading] = useState(false);
   const [measurementError, setMeasurementError] = useState('');
@@ -190,17 +191,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 		  }
 		}, []);
 
-		// Delay paywall when user hits limit
-		React.useEffect(() => {
-		  if (isAtLimit && !showDelayedPaywall) {
-			const timer = setTimeout(() => {
-			  setShowDelayedPaywall(true);
-			}, 10000); // 10 seconds
-			return () => clearTimeout(timer);
-		  }
-		}, [isAtLimit, showDelayedPaywall]);
-
-	
+			
 	// Handle "Try an example" from banner
 	const handleTryExample = () => {
 	  // Instantly pre-fill demo data
@@ -230,6 +221,12 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 	// Handle user editing fields - exits demo mode
 	const handleUserInput = (field: 'userType' | 'userAction' | 'userReason', value: string) => {
 	 console.log('handleUserInput called!', { field, showDemoResult });	
+	 
+	// Show paywall immediately if at limit
+	if (isAtLimit) {
+	setShowPaywall(true);
+	return;
+	}
 		
     // Exit demo mode when user types their own input
     if (isDemoMode) {
@@ -251,6 +248,12 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 	  if (showDemoResult) {
 		setShowDemoResult(false);
 	  }
+	  
+	 // Show paywall immediately if at limit
+	if (isAtLimit) {
+	setShowPaywall(true);
+	return;
+	}
 	  
 	  // Validation
 	  if (!userType.trim() || !userAction.trim() || !userReason.trim() || !platform) {
@@ -332,7 +335,8 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 		if (!response.ok) {
 		  throw new Error(data.error || data.message || 'Failed to generate story');
 		}
-
+		
+		setResultAcFormat(acFormat);
 		setResult(data);
 
 		// Store inputs before clearing (needed for measurement plan)
@@ -341,11 +345,6 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 		const storedUserReason = userReason;
 		const storedPlatform = platform;
 
-		// Clear input fields after successful generation
-		setUserType('');
-		setUserAction('');
-		setUserReason('');
-		setPlatform('');
 
 		// Trigger measurement plan generation in background
 			if (isSignedIn && isPaidTier) {
@@ -611,7 +610,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
         )}
 
         {/* Paywall Overlay - Free Tier Hit Limit */}
-        {isSignedIn && !isPaidTier && showDelayedPaywall && (
+        {isSignedIn && !isPaidTier && showPaywall && (
           <div style={{
             position: 'absolute',
             top: 0,
@@ -1072,7 +1071,10 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           }}>Platform</label>
           <select
 		    value={platform}
-		    onChange={isDemoMode ? undefined : (e) => setPlatform(e.target.value)}
+		    onChange={isDemoMode ? undefined : (e) => {
+			if (isAtLimit) { setShowPaywall(true); return; }
+			setPlatform(e.target.value);
+		  }}
 		    disabled={loading || isDemoMode}
 		    style={{
 			width: '100%',
@@ -1110,7 +1112,10 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
           }}>AC Format</label>
           <select
 		  value={acFormat}
-		  onChange={isDemoMode ? undefined : (e) => setAcFormat(e.target.value)}
+		  onChange={isDemoMode ? undefined : (e) => {
+		  if (isAtLimit) { setShowPaywall(true); return; }
+		  setAcFormat(e.target.value);
+		}}
 		  disabled={loading || isDemoMode}
 		  style={{
 			width: '100%',
@@ -1304,29 +1309,27 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
               color: 'var(--muted)',
               marginBottom: '8px',
             }}>Acceptance Criteria</h3>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-            }}>
-              {result.acceptanceCriteria.map((ac, idx) => (
-                <li key={idx} style={{
-                  fontSize: '14px',
-                  color: 'var(--ink)',
-                  lineHeight: 1.6,
-                  marginBottom: '8px',
-                  paddingLeft: '20px',
-                  position: 'relative',
-                }}>
-                  <span style={{
-                    position: 'absolute',
-                    left: 0,
-                    color: 'var(--accent)',
-                  }}>•</span>
-                  {ac}
-                </li>
-              ))}
-            </ul>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+			  {result.acceptanceCriteria.map((ac, idx) => (
+				<li key={idx} style={{
+				  fontSize: '14px',
+				  color: 'var(--ink)',
+				  lineHeight: 1.6,
+				  marginBottom: '8px',
+				  paddingLeft: resultAcFormat === 'default' ? '20px' : '0px',
+				  position: 'relative',
+				}}>
+				  {resultAcFormat === 'default' && (
+					<span style={{
+					  position: 'absolute',
+					  left: 0,
+					  color: 'var(--accent)',
+					}}>•</span>
+				  )}
+				  {ac}
+				</li>
+			  ))}
+			</ul>
           </div>
 
           <div>

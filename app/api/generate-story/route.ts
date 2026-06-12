@@ -185,9 +185,10 @@ INPUT:
 OUTPUT REQUIREMENTS:
 
 1. USER STORY
-Format EXACTLY as: "As a ${userType}, I want to ${userAction} so that ${userReason}"
-DO NOT modify this format. DO NOT add platform-specific language like "via mobile app" or "through a web interface".
-The platform is just context - keep it out of the story text itself.
+Rewrite and polish the user story using the inputs as your source material. 
+Fix any spelling, grammar, or phrasing issues while preserving the user's intent. 
+Keep the standard format: "As a [user type], I want to [action] so that [reason]". 
+DO NOT include platform-specific language like "via mobile app" or "through a web interface" in the story text.
 
 2. ACCEPTANCE CRITERIA - QUALITY RULES
 - Focus on happy path first, edge cases last
