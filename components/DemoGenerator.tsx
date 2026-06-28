@@ -577,7 +577,7 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
 			  fontWeight: 700,
 			  color: 'var(--ink)',
 			  marginBottom: '12px',
-			}}>Enter your email to start</h2>
+			}}>Create your free account</h2>
 			<p style={{
 			  fontSize: '15px',
 			  color: 'var(--muted)',
