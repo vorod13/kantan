@@ -1,45 +1,35 @@
 {
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=63072000; includeSubDomains; preload"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://subscribe-forms.beehiiv.com https://fonts.googleapis.com https://*.clerk.accounts.dev https://clerk.kantanlabs.com https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; frame-src https://subscribe-forms.beehiiv.com https://challenges.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://subscribe-forms.beehiiv.com https://api.anthropic.com https://*.clerk.accounts.dev https://clerk.kantanlabs.com https://clerk.divine-gelding-19.lcl.dev wss://*.clerk.accounts.dev wss://clerk.kantanlabs.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://vitals.vercel-insights.com; worker-src 'self' blob:;"
-        }
-      ]
-    }
-  ],
   "redirects": [
+    {
+      "source": "/demo",
+      "destination": "/",
+      "permanent": false
+    },
     {
       "source": "/:path*",
       "has": [{"type": "host", "value": "www.kantanlabs.com"}],
       "destination": "https://kantanlabs.com/:path*",
       "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://subscribe-forms.beehiiv.com https://fonts.googleapis.com https://*.clerk.accounts.dev https://clerk.kantanlabs.com https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; frame-src https://subscribe-forms.beehiiv.com https://challenges.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://subscribe-forms.beehiiv.com https://api.anthropic.com https://*.clerk.accounts.dev https://clerk.kantanlabs.com https://clerk.divine-gelding-19.lcl.dev wss://*.clerk.accounts.dev wss://clerk.kantanlabs.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://vitals.vercel-insights.com; worker-src 'self' blob:;" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
     }
   ]
 }
