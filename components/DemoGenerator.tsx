@@ -605,6 +605,18 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
               >
                 Get Your Magic Link — Free →
               </a>
+				<a
+                href="/sign-in"
+                style={{
+                  display: 'block',
+                  marginTop: '16px',
+                  fontSize: '13px',
+                  color: 'var(--muted)',
+                  textDecoration: 'underline',
+                }}
+              >
+                Already have an account? Sign in
+              </a>
             </div>
           </div>
         )}
@@ -728,6 +740,18 @@ export default function DemoGenerator({ subscriptionTier, isSignedIn }: { subscr
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
                 Get Solo Access · $19/month →
+              </a>
+				<a
+                href="/sign-in"
+                style={{
+                  display: 'block',
+                  marginTop: '16px',
+                  fontSize: '13px',
+                  color: 'var(--muted)',
+                  textDecoration: 'underline',
+                }}
+              >
+                Already have an account? Sign in
               </a>
             </div>
           </div>
